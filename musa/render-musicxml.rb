@@ -228,7 +228,14 @@ class RenderMusicXML
 
   private def instrument_number_to_symbol(number)
     return nil if number.nil?
-    "vln#{number.to_i.to_s}".to_sym
+
+    if (1..4).cover?(number)
+      "vln#{number.to_i.to_s}".to_sym
+    elsif (5..8).cover?(number)
+      "cello#{(number.to_i - 4).to_s}".to_sym
+    else
+      :unknown
+    end
   end
 
   private def render_dynamics(dynamics0, dynamicsF, duration, score:, instrument:, position:)

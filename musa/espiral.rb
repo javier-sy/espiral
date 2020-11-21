@@ -16,6 +16,7 @@ include Musa::MIDIVoices
 
 using Musa::Extension::Matrix
 using Musa::Extension::InspectNice
+using Musa::Extension::DeepCopy
 
 rows = []
 r = 0.0
@@ -48,31 +49,85 @@ quantized_timed_series =
           *line.to_timed_serie(time_start_component: 2, base_duration: 1)
                .flatten_timed
                .split
+               .to_a
                .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
                .collect { |_| _.quantize(predictive: true, stops: false) } )
     end
 
 midi_quantized_timed_series =
-    quantized_timed_series.collect do |line|
+    quantized_timed_series.clone(deep: true).collect do |line|
       TIMED_UNION(
-          *line.flatten_timed # TimedSerie
+          *line.flatten_timed
                .split
+               .to_a
                .collect { |_|
                  _.anticipate { |c, n|
                    n ? c.clone.tap { |_| _[:next_value] = (c[:value] == n[:value]) ? nil : n[:value] } :
                        c } } )
     end
 
-score_quantized_timed_series =
-    quantized_timed_series.collect do |line|
+violin_score_quantized_timed_series =
+    quantized_timed_series.clone(deep: true).collect do |line|
       TIMED_UNION(
-          *line.flatten_timed # TimedSerie
+          **line.map { |_|
+                 { time: _[:time],
+                   value: {
+                       pitch: _[:value][0] ? 84 + _[:value][0] : nil,
+                       dynamics: _[:value][1] ? (_[:value][1] / 6r).to_i - 3 : nil,
+                       instrument: 1 },
+                   duration: {
+                       pitch: _[:duration][0],
+                       dynamics: _[:duration][1],
+                       instrument: [_[:duration][0] || 0, _[:duration][1] || 0].max } }.extend(AbsTimed) }
+               .remove { |_| _[:duration].values.any? { |d| d && d < 1/16r } }
+               .flatten_timed
                .split
-               .collect { |_|
+               .to_h
+               .transform_values { |_|
                  _.anticipate { |c, n|
                    n ? c.clone.tap { |_| _[:next_value] = (c[:value] == n[:value]) ? nil : n[:value] } :
                        c } } )
     end
+
+cello_score_quantized_timed_series =
+    quantized_timed_series.clone(deep: true).collect do |line|
+      TIMED_UNION(
+          **line.map { |_|
+            { time: _[:time],
+              value: {
+                  pitch: _[:value][1] ? 48 + _[:value][1] : nil,
+                  dynamics: _[:value][0] ? (_[:value][0] / 6r).to_i - 3 : nil,
+                  instrument: 5 },
+              duration: {
+                  pitch: _[:duration][1],
+                  dynamics: _[:duration][0],
+                  instrument: [_[:duration][0] || 0, _[:duration][1] || 0].max } }.extend(AbsTimed) }
+                .remove { |_| _[:duration].values.any? { |d| d && d < 1/16r } }
+                .flatten_timed
+                .split
+                .to_h
+                .transform_values { |_|
+                  _.anticipate { |c, n|
+                    n ? c.clone.tap { |_| _[:next_value] = (c[:value] == n[:value]) ? nil : n[:value] } :
+                        c } } )
+    end
+
+renderer = RenderMusicXML.new
+score = Score.new
+
+# violin_score_quantized_timed_series.each do |line|
+#   renderer.render(line, to: score)
+# end
+
+renderer.render(violin_score_quantized_timed_series[0], to: score)
+# renderer.render(violin_score_quantized_timed_series[1], to: score)
+renderer.render(cello_score_quantized_timed_series[0], to: score)
+# renderer.render(cello_score_quantized_timed_series[1], to: score)
+
+renderer.render_score(4, 4, score)
+
+exit
+
 
 puts "midi_quantized_timed_series.size #{midi_quantized_timed_series.size}"
 
@@ -87,7 +142,7 @@ cello = Violin.new('cello', midi_voices: cello_midi_voices.voices, tick_duration
 
 chromatic_scale = Scales.default_system.default_tuning.chromatic[0]
 
-score = Score.new
+
 
 coordinates = []
 
@@ -132,6 +187,3 @@ clock.start
 probe.run
 clock.stop
 
-renderer = RenderMusicXML.new
-
-renderer.render_score(4, 4, score)
