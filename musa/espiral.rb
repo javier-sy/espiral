@@ -42,20 +42,30 @@ probe = Probe3D.new(5, logger: sequencer.logger)
 
 probe.render_matrix(m, color: 0xa0a0a0)
 
-quantized_timed_series = m.to_p(time_dimension: 2, keep_time: true).collect do |line|
-  TIMED_UNION(
-      *line.to_timed_serie(time_start_component: 2, base_duration: 1)
-           .flatten_timed
-           .split
-           .to_a
-           .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
-           .collect { |_|
-             _.quantize(predictive: true, stops: false)
-                 .anticipate { |c, n|
-                   n ? c.clone.tap { |_| _[:next_value] = (c[:value] == n[:value]) ? nil : n[:value] } :
-                       c }
-                 } )
-end
+base_quantized_timed_series =
+    m.to_p(time_dimension: 2, keep_time: true)
+        .collect do |line| # Array of
+          TIMED_UNION( # TimedSerie
+            *line.to_timed_serie(time_start_component: 2, base_duration: 1)
+                 .flatten_timed
+                 .split
+                 .to_a
+                 .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
+                 .collect { |_| _.quantize(predictive: true, stops: false) } )
+    end
+
+quantized_timed_series =
+    base_quantized_timed_series
+        .collect do |line| # Array
+          TIMED_UNION(
+              *line.flatten_timed # TimedSerie
+                   .split
+                   .to_a
+                   .collect { |_|
+                     _.anticipate { |c, n|
+                       n ? c.clone.tap { |_| _[:next_value] = (c[:value] == n[:value]) ? nil : n[:value] } :
+                           c } } )
+    end
 
 puts "quantized_timed_series.size #{quantized_timed_series.size}"
 

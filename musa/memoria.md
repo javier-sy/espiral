@@ -82,3 +82,7 @@ Cada vez estoy más impresionado del resultado.
 # Viernes, 20 noviembre 2020
 
 Subido a github.
+
+Había problemas con las series split y vueltas a TIMED_UNION a la hora de generar una partitura
+a través del código que tiene en cuenta dinámicas y transición entre instrumentos. Esto me lleva a 
+que será necesario rediseñar la estrategia de prototype/instance de las series.
