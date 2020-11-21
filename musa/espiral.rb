@@ -42,32 +42,39 @@ probe = Probe3D.new(5, logger: sequencer.logger)
 
 probe.render_matrix(m, color: 0xa0a0a0)
 
-base_quantized_timed_series =
-    m.to_p(time_dimension: 2, keep_time: true)
-        .collect do |line| # Array of
-          TIMED_UNION( # TimedSerie
-            *line.to_timed_serie(time_start_component: 2, base_duration: 1)
-                 .flatten_timed
-                 .split
-                 .to_a
-                 .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
-                 .collect { |_| _.quantize(predictive: true, stops: false) } )
-    end
-
 quantized_timed_series =
-    base_quantized_timed_series
-        .collect do |line| # Array
-          TIMED_UNION(
-              *line.flatten_timed # TimedSerie
-                   .split
-                   .to_a
-                   .collect { |_|
-                     _.anticipate { |c, n|
-                       n ? c.clone.tap { |_| _[:next_value] = (c[:value] == n[:value]) ? nil : n[:value] } :
-                           c } } )
+    m.to_p(time_dimension: 2, keep_time: true).collect do |line|
+      TIMED_UNION(
+          *line.to_timed_serie(time_start_component: 2, base_duration: 1)
+               .flatten_timed
+               .split
+               .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
+               .collect { |_| _.quantize(predictive: true, stops: false) } )
     end
 
-puts "quantized_timed_series.size #{quantized_timed_series.size}"
+midi_quantized_timed_series =
+    quantized_timed_series.collect do |line|
+      TIMED_UNION(
+          *line.flatten_timed # TimedSerie
+               .split
+               .collect { |_|
+                 _.anticipate { |c, n|
+                   n ? c.clone.tap { |_| _[:next_value] = (c[:value] == n[:value]) ? nil : n[:value] } :
+                       c } } )
+    end
+
+score_quantized_timed_series =
+    quantized_timed_series.collect do |line|
+      TIMED_UNION(
+          *line.flatten_timed # TimedSerie
+               .split
+               .collect { |_|
+                 _.anticipate { |c, n|
+                   n ? c.clone.tap { |_| _[:next_value] = (c[:value] == n[:value]) ? nil : n[:value] } :
+                       c } } )
+    end
+
+puts "midi_quantized_timed_series.size #{midi_quantized_timed_series.size}"
 
 midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[0]
 
@@ -85,7 +92,7 @@ score = Score.new
 coordinates = []
 
 sequencer.at 1 do
-  quantized_timed_series.each_with_index do |quantized_timed_serie, i|
+  midi_quantized_timed_series.each_with_index do |quantized_timed_serie, i|
     sequencer.play_timed quantized_timed_serie do |values, duration:|
 
       quantized_duration =
@@ -102,11 +109,7 @@ sequencer.at 1 do
                  legato: true,
                  voice: i }.extend(GDV)
 
-        nc = violin.note **note.to_pdv(chromatic_scale)
-
-        note[:instrument] = "vln#{1 + nc.voice.channel % 4}".to_sym
-
-        score.at(sequencer.position, add: note.to_pdv(chromatic_scale))
+        violin.note **note.to_pdv(chromatic_scale)
       end
 
       if values[1]
@@ -116,11 +119,7 @@ sequencer.at 1 do
                  legato: true,
                  voice: i }.extend(GDV)
 
-        nc = cello.note **note.to_pdv(chromatic_scale)
-
-        note[:instrument] = "cello#{1 + (nc.voice.channel - 8) % 4}".to_sym
-
-        score.at(sequencer.position, add: note.to_pdv(chromatic_scale))
+        cello.note **note.to_pdv(chromatic_scale)
       end
     end
   end
