@@ -87,5 +87,16 @@ Había problemas con las series split y vueltas a TIMED_UNION a la hora de gener
 a través del código que tiene en cuenta dinámicas y transición entre instrumentos. Esto me lleva a 
 que será necesario rediseñar la estrategia de prototype/instance de las series.
 
-# Sábado, 21 noviembre 2020
+# Lunes, 23 noviembre 2020
+
+Hay problemas con la generación de partitura.
+
+# Miércoles, 25 noviembre 2020
+
+Problemas de partitura resueltos. Mayormente eran problemas de no ser coherente al usar el modelo 
+basado en series con transformaciones. Las transformaciones van bien, lo que pasa es que yo le 
+ponía atributos nuevos en pasos del flujo de transformaciones más avanzados y eso impedía que
+las propias transformaciones los transformaran correctamente.
+
+Aún falta añadir los legatos en las cuerdas.
 

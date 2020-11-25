@@ -18,6 +18,17 @@ using Musa::Extension::Matrix
 using Musa::Extension::InspectNice
 using Musa::Extension::DeepCopy
 
+
+#
+# Configuration: number of threads to render to musicxml (nil for all)
+#
+
+threads = nil
+
+#
+# Compute spiral 3D matrix
+#
+
 rows = []
 r = 0.0
 # pitch/velocity, velocity/pitch, time
@@ -30,20 +41,19 @@ end
 
 m = Matrix[*rows]
 
+# Rotate matrix
+#
 r = MatrixOperations.rotation(0.45, 1, 1, 0)
 
 m = m * r
 
-clock = TimerClock.new ticks_per_beat: 4, bpm: 90
-sequencer = Sequencer.new 4, 4
+#
+# Prepare transformations to score and MIDI
+#
 
-sequencer.logger.info!
-
-probe = Probe3D.new(5, logger: sequencer.logger)
-
-probe.render_matrix(m, color: 0xa0a0a0)
-
-quantized_timed_series =
+# Source quantization for MIDI and score instruments
+#
+midi_quantized_timed_series =
     m.to_p(time_dimension: 2, keep_time: true).collect do |line|
       TIMED_UNION(
           *line.to_timed_serie(time_start_component: 2, base_duration: 1)
@@ -51,83 +61,178 @@ quantized_timed_series =
                .split
                .to_a
                .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
-               .collect { |_| _.quantize(predictive: true, stops: false) } )
-    end
-
-midi_quantized_timed_series =
-    quantized_timed_series.clone(deep: true).collect do |line|
-      TIMED_UNION(
-          *line.flatten_timed
-               .split
-               .to_a
                .collect { |_|
-                 _.anticipate { |c, n|
-                   n ? c.clone.tap { |_| _[:next_value] = (c[:value] == n[:value]) ? nil : n[:value] } :
-                       c } } )
+                 _.quantize(predictive: true, stops: false)
+                     .anticipate { |_, c, n|
+                       n ? c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] } :
+                           c } }
+      )
     end
 
-violin_score_quantized_timed_series =
-    quantized_timed_series.clone(deep: true).collect do |line|
-      TIMED_UNION(
-          **line.map { |_|
-                 { time: _[:time],
-                   value: {
-                       pitch: _[:value][0] ? 84 + _[:value][0] : nil,
-                       dynamics: _[:value][1] ? (_[:value][1] / 6r).to_i - 3 : nil,
-                       instrument: 1 },
-                   duration: {
-                       pitch: _[:duration][0],
-                       dynamics: _[:duration][1],
-                       instrument: [_[:duration][0] || 0, _[:duration][1] || 0].max } }.extend(AbsTimed) }
-               .remove { |_| _[:duration].values.any? { |d| d && d < 1/16r } }
+violin_quantized_array_of_timed_series =
+    m.to_p(time_dimension: 2, keep_time: true).collect.with_index do |line, i|
+      Array[
+          *line.to_timed_serie(time_start_component: 2, base_duration: 1)
+               .map { |_| _.clone.tap { |_| _[:value][3] = (i % 8) + 1 } } # add instrument as line number
                .flatten_timed
                .split
-               .to_h
-               .transform_values { |_|
-                 _.anticipate { |c, n|
-                   n ? c.clone.tap { |_| _[:next_value] = (c[:value] == n[:value]) ? nil : n[:value] } :
-                       c } } )
+               .to_a
+               .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
+               .collect.with_index { |_, i|
+                  case i
+                  when 0 # pitch
+                    _.quantize(predictive: true, stops: false, step: 1)
+                        .map { |_| _.clone.tap { |_| _[:value] = 84 + _[:value] } }
+                        .anticipate { |_, c, n| c.clone.tap { |_| _[:next_value] = n&.[](:value) } }
+                  when 1 # dynamics
+                    _.quantize(predictive: true, stops: false, step: 6)
+                        .map { |_| _.clone.tap { |_| _[:value] = 7 + (_[:value] / 6r).to_i } }
+                        .anticipate { |_, c, n| c.clone.tap { |_| _[:next_value] = n&.[](:value) } }
+                  when 2 # instrument
+                    _.quantize(stops: false)
+                  end
+                } ]
+    end
+
+violin_quantized_united_timed_series = violin_quantized_array_of_timed_series.collect { |lines| TIMED_UNION(*lines) }
+
+cello_quantized_array_of_timed_series =
+    m.to_p(time_dimension: 2, keep_time: true).collect.with_index do |line, i|
+      Array[
+          *line.to_timed_serie(time_start_component: 2, base_duration: 1)
+               .map { |_| _.clone.tap { |_| _[:value][3] = (i % 8) + 9 } } # add instrument as line number
+               .flatten_timed
+               .split
+               .to_a
+               .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
+               .collect.with_index { |_, i|
+                  case i
+                  when 0 # dynamics
+                    _.quantize(predictive: true, stops: false, step: 6)
+                        .map { |_| _.clone.tap { |_| _[:value] = 7 + (_[:value] / 6r).to_i } }
+                        .anticipate { |_, c, n| c.clone.tap { |_| _[:next_value] = n&.[](:value) } }
+                  when 1 # pitch
+                    _.quantize(predictive: true, stops: false, step: 1)
+                        .map { |_| _.clone.tap { |_| _[:value] = 48 + _[:value] } }
+                        .anticipate { |_, c, n| c.clone.tap { |_| _[:next_value] = n&.[](:value) } }
+                  when 2 # instrument
+                    _.quantize(stops: false)
+                  end
+          } ]
+    end
+
+cello_quantized_united_timed_series = cello_quantized_array_of_timed_series.collect { |lines| TIMED_UNION(*lines) }
+
+#
+# Quantized series transformation to playable datasets for score instruments
+#
+
+violin_score_quantized_timed_series =
+    violin_quantized_united_timed_series.clone(deep: true).collect do |line|
+      TIMED_UNION(
+          **line.map { |_|
+                { time: _[:time],
+                  value: {
+                      pitch: _[:value][0],
+                      dynamics: _[:value][1],
+                      instrument: _[:value][2] },
+                  duration: {
+                      pitch: _[:duration][0],
+                      dynamics: _[:duration][1],
+                      instrument: _[:duration][2] },
+                  next_value: {
+                      pitch: _[:next_value][0],
+                      dynamics: _[:next_value][1],
+                      instrument: _[:next_value][2] }
+                  }.extend(AbsTimed)
+          }.flatten_timed
+           .split
+           .to_h
+      )
     end
 
 cello_score_quantized_timed_series =
-    quantized_timed_series.clone(deep: true).collect do |line|
+    cello_quantized_united_timed_series.clone(deep: true).collect do |line|
       TIMED_UNION(
           **line.map { |_|
             { time: _[:time],
               value: {
-                  pitch: _[:value][1] ? 48 + _[:value][1] : nil,
-                  dynamics: _[:value][0] ? (_[:value][0] / 6r).to_i - 3 : nil,
-                  instrument: 5 },
+                  dynamics: _[:value][0],
+                  pitch: _[:value][1],
+                  instrument: _[:value][2] },
               duration: {
-                  pitch: _[:duration][1],
                   dynamics: _[:duration][0],
-                  instrument: [_[:duration][0] || 0, _[:duration][1] || 0].max } }.extend(AbsTimed) }
-                .remove { |_| _[:duration].values.any? { |d| d && d < 1/16r } }
-                .flatten_timed
+                  pitch: _[:duration][1],
+                  instrument: _[:duration][2] },
+              next_value: {
+                  dynamics: _[:next_value][0],
+                  pitch: _[:next_value][1],
+                  instrument: _[:next_value][2] }
+            }.extend(AbsTimed)
+          }.flatten_timed
                 .split
                 .to_h
-                .transform_values { |_|
-                  _.anticipate { |c, n|
-                    n ? c.clone.tap { |_| _[:next_value] = (c[:value] == n[:value]) ? nil : n[:value] } :
-                        c } } )
+      )
     end
+
+#
+# Render to score
+#
 
 renderer = RenderMusicXML.new
 score = Score.new
 
-# violin_score_quantized_timed_series.each do |line|
-#   renderer.render(line, to: score)
-# end
+violin_score_quantized_timed_series[0..threads&.-(1)].each_with_index do |serie, i|
+  puts
+  puts msg = "rendering segment #{i} (violin #{(i % 8) + 1})"
+  puts "-" * msg.size
 
-renderer.render(violin_score_quantized_timed_series[0], to: score)
-# renderer.render(violin_score_quantized_timed_series[1], to: score)
-renderer.render(cello_score_quantized_timed_series[0], to: score)
-# renderer.render(cello_score_quantized_timed_series[1], to: score)
+  renderer.render(serie, to: score)
+end
+
+cello_score_quantized_timed_series[0..threads&.-(1)].each_with_index do |serie, i|
+  puts
+  puts msg = "rendering segment #{i} (cello #{(i % 8) + 1})"
+  puts "-" * msg.size
+
+  renderer.render(serie, to: score)
+end
+
+puts
+puts "SCORE"
+puts "-----"
+pp score
+
+#
+# Render to musicxml file
+#
 
 renderer.render_score(4, 4, score)
 
-exit
+#################################
+# 3D graphics and MIDI playback #
+#################################
 
+#
+# Sequencer and logging setup
+#
+
+clock = TimerClock.new ticks_per_beat: 4, bpm: 90
+sequencer = Sequencer.new 4, 4
+
+sequencer.logger.info!
+
+#
+# 3D rendering setup and base drawing
+#
+
+probe = Probe3D.new(10, logger: sequencer.logger)
+
+probe.render_matrix(m, color: 0xa0a0a0)
+
+#
+# MIDI rendering
+#
 
 puts "midi_quantized_timed_series.size #{midi_quantized_timed_series.size}"
 
@@ -136,54 +241,61 @@ midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[0]
 violin_midi_voices = MIDIVoices.new(sequencer: sequencer, output: midi_output, channels: 0..7)
 cello_midi_voices = MIDIVoices.new(sequencer: sequencer, output: midi_output, channels: 8..15)
 
-violin = Violin.new('violin', midi_voices: violin_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: sequencer.logger)
-cello = Violin.new('cello', midi_voices: cello_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: sequencer.logger)
+violin = Violin.new('violin',
+                    midi_voices: violin_midi_voices.voices,
+                    tick_duration: sequencer.tick_duration,
+                    logger: sequencer.logger)
 
+cello = Violin.new('cello',
+                   midi_voices: cello_midi_voices.voices,
+                   tick_duration: sequencer.tick_duration,
+                   logger: sequencer.logger)
 
 chromatic_scale = Scales.default_system.default_tuning.chromatic[0]
 
+Thread.new do
+  coordinates = []
 
+  sequencer.at 1 do
+    midi_quantized_timed_series.each_with_index do |quantized_timed_serie, i|
+      sequencer.play_timed quantized_timed_serie do |values, duration:|
 
-coordinates = []
+        quantized_duration =
+            duration.collect { |d| sequencer.quantize_position(sequencer.position + d) - sequencer.position if d }
 
-sequencer.at 1 do
-  midi_quantized_timed_series.each_with_index do |quantized_timed_serie, i|
-    sequencer.play_timed quantized_timed_serie do |values, duration:|
+        coordinates[i] = [values[0] || coordinates[i][0], values[1] || coordinates[i][1], sequencer.position - 1r]
 
-      quantized_duration =
-          duration.collect { |d| sequencer.quantize_position(sequencer.position + d) - sequencer.position if d }
+        probe.render_point(i, coordinates[i], color: 0x0fffff)
 
-      coordinates[i] = [values[0] || coordinates[i][0], values[1] || coordinates[i][1], sequencer.position - 1r]
+        if values[0]
+          note = { grade: (84 + values[0]).to_i,
+                   duration: quantized_duration[0],
+                   velocity: (coordinates[i][1] / 6r).to_i - 3,
+                   legato: true,
+                   voice: i }.extend(GDV)
 
-      probe.render_point(i, coordinates[i], color: 0x0fffff)
+          violin.note **note.to_pdv(chromatic_scale)
+        end
 
-      if values[0]
-        note = { grade: (84 + values[0]).to_i,
-                 duration: quantized_duration[0],
-                 velocity: (coordinates[i][1] / 6r).to_i - 3, # 90 + 5*coordinates[i][1],
-                 legato: true,
-                 voice: i }.extend(GDV)
+        if values[1]
+          note = { grade: (48 + values[1]).to_i,
+                   duration: quantized_duration[1],
+                   velocity: (coordinates[i][0] / 6r).to_i - 3,
+                   legato: true,
+                   voice: i }.extend(GDV)
 
-        violin.note **note.to_pdv(chromatic_scale)
-      end
-
-      if values[1]
-        note = { grade: (48 + values[1]).to_i,
-                 duration: quantized_duration[1],
-                 velocity: (coordinates[i][0] / 6r).to_i - 3, # 90 + 5*coordinates[i][0],
-                 legato: true,
-                 voice: i }.extend(GDV)
-
-        cello.note **note.to_pdv(chromatic_scale)
+          cello.note **note.to_pdv(chromatic_scale)
+        end
       end
     end
   end
+
+  Thread.new { clock.run { sequencer.tick } }
+
+  sleep 0.1
+  clock.start
 end
 
-Thread.new { clock.run { sequencer.tick } }
-sleep 0.1
-
-clock.start
 probe.run
 clock.stop
 
