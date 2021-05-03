@@ -100,3 +100,13 @@ las propias transformaciones los transformaran correctamente.
 
 Aún falta añadir los legatos en las cuerdas.
 
+Voy a empezar el curso de orquestación.
+
+# Lunes, 3 mayo 2021
+
+Al volver a ejecutar espiral.rb, casualmente tenía cargado en Live un sinte monofónico (Knifonium con preset Franken Lead)
+que escuchaba en todos los canales midi. El principio es un poco soso pero la continuación es espectacular.
+Se produce una reducción de todas las voces a 1.
+
+Podría usarse este glitch para generar una voz alta y una baja, p.ej.
+
