@@ -1,4 +1,6 @@
 **/.DS_Store
+**/.local/
+**/.ipynb_checkpoints/
 *.gem
 .bundle
 .rspec

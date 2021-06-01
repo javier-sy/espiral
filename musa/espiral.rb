@@ -18,7 +18,6 @@ using Musa::Extension::Matrix
 using Musa::Extension::InspectNice
 using Musa::Extension::DeepCopy
 
-
 #
 # Configuration: number of threads to render to musicxml (nil for all)
 #
@@ -43,7 +42,11 @@ m = Matrix[*rows]
 
 # Rotate matrix
 #
-r = MatrixOperations.rotation(0.45, 1, 1, 0)
+# r = MatrixOperations.rotation(0.45, 1, 1, 0)
+# r = MatrixOperations.rotation(0.35, 0.5, 1, 0.3)
+# r = MatrixOperations.rotation(0.25, 0.1, 1, 0.1) # interesante
+# r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0) # interesante
+r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0)
 
 m = m * r
 
@@ -207,7 +210,7 @@ pp score
 # Render to musicxml file
 #
 
-renderer.render_score(4, 4, score)
+# renderer.render_score(4, 4, score)
 
 #################################
 # 3D graphics and MIDI playback #

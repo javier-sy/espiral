@@ -110,3 +110,245 @@ Se produce una reducción de todas las voces a 1.
 
 Podría usarse este glitch para generar una voz alta y una baja, p.ej.
 
+Volviendo a la intención original de renderizar sobre instrumentos de cuerda, compruebo
+que se repiten notas consecutivamente en diferentes voces. Para notas basadas en el ataque es válido, pero para notas basadas en legato es 
+mejor evitar los diferentes note-on y crear uno sólo con la duración total; quizás con una modulación
+de intensidad según la intensidad de cada note-on. Por otro lado que la misma nota esté en varias voces es sólo una cuestión de que hay
+unos unísonos eventuales que estarán ubicados en diferentes instrumentos, dando un timbre diferente.
+
+Preguntándome cómo hacer la orquestación, factor determinante para decidir cómo "mapear" las dimensiones
+de la espiral, se me ocurre emplear un "continuo tímbrico" en el que ubicar cada instrumento/ataque. Puede ser una o varias dimensiones.
+
+A priori, selecciono un conjunto de instrumentos (cuerdas, piccolo, flauta, 
+lengüeta simple: clarinete, clarinete bajo; lengüeta doble: oboe, fagot, corno inglés; 
+metal: corno francés, trompeta, trombón, tuba, trombón contrabajo; 
+percusión con altura: campanas tubulares, marimba, vibráfono, glockenspiel). 
+Aunque supera el número inicial de 24 (condición para tener un instrumento por altavoz con una pieza para 24 altavoces) que quería usar me parece viable que sean más (hasta quizás 48?)
+puesto que no sonarán todos a la vez y se puede repetir altavoz.
+
+# Martes, 4 mayo 2021
+
+Para estudiar la posibilidad del "continuo tímbrico" de los instrumentos realizo experimentos
+haciendo el análisis espectral de los instrumentos. La intención es comprobar las diferencias espectrales y de ello deducir una o más dimensiones.
+(quizás proporción de parciales armónicos vs inarmónicos, armónicos pares vs impares, cantidad de armónicos, etc)
+
+Los resultados están en documento dentro del proyecto.
+
+# Miércoles, 5 mayo 2021
+
+He estado analizando las distribuciones espectrales de los instrumentos de la orquesta.
+He comenzado a pautar el orden de los armónicos, y voy a poder indicar los niveles relativos de cada uno, hasta cerca del 20º armónico.
+Con esto tendré la información para establecer dimensiones en base a varios parámetros.
+Se me ocurren, por ahora: 
+- En qué posición ordinal está la fundamental (sorprendentemente muchos instrumentos tienen una fundamental más débil que los armónicos)?
+- Qué predominancia de armónicos consonantes/disonantes hay?
+- Hay otros parciales significativos?
+
+# Jueves, 6 mayo 2021
+
+Durante la medición de los armónicos he tenido que construir una "regla" gráfica a medida de las gráficas de espectro para poder
+trasladar numéricamente la intensidad relativa de los armónicos a ruby. Este instrumento ha permitido que sea una tarea relativamente fácil.
+Antes de hacer la versión final me era tremendamente lento trasladar los números.
+
+En esto se aprecia cómo una herramienta influye en la creación y cómo su influencia abre nuevas posibilidades.
+
+# Viernes, 7 mayo 2021
+
+Sigo pautando los datos de los armónicos.
+
+Añado el clavicordio (harpsichord) de Pianoteq.
+
+Sorprendente la cantidad de parciales no armónicos de los instrumentos 
+percusivos "tonales". Prácticamente sólo tienen 3 o 4 armónicos reconocibles clave (el 3 y 4 entre ellos, que definen la quinta y la segunda octava)
+
+Ahora que ya tengo los datos de sustain pautados para los instrumentos "armónicos" y para los percusivos "inarmónicos", 
+¿cómo convierto los datos en dimensiones sensibles perceptualmente coherentes?
+
+Se me ocurre:
+
+- Diferencia de nivel entre la fundamental y el armónico más intenso
+- Posición en que cae el armónico más intenso: ¿qué intérvalo juega? ¿es un intérvalo consonante/disonante?
+- Proporción de parciales vs armónicos; ponderación en base al nivel y a la proximidad con la fundamental.
+- Intensidad acumulada de los parciales, agrupada por nota sobre la que caen
+- Regularidad del perfil armónico: 
+  - intensidades decrecientes/crecientes
+  - por cuántos armónicos seguidos crece/decrece la intensidad
+  - nº y "volumen" (suma de intensidades? media de intensidades?) de los perfiles "campana" (subida+bajada)
+  
+# Sábado, 8 mayo 2021
+
+Para analizar los datos tabulados de armónicos se me ocurre representarlos gráficamente para ir comparando variables.
+En Ruby no hay buenas librerías gráficas. Opto por estudiar Jupyter Lab que, sorpresa, ahora incluye un kernel Ruby.
+
+# Domingo, 9 mayo 2021
+
+Estudiando Jupyter-Lab. Todo un mundo en análisis de datos y computación científica.
+Parece que iruby en Jupyterlab no funciona bien, al menos con los paquetes de presentación como "daru-view".
+
+# Lunes, 10 mayo 2021
+
+Estudio "IPython Interactive Computing and Visualization" (Cyrille Rosant).
+Compruebo que los elementos gráficos interactivos no funcionan en Safari pero sí en Chrome.
+Voy a comprobar si IRuby funciona mejor con Chrome.
+Los problemas eran diversos al ejecutar IRuby en Jupiterlab, entre ellos que jupyter lab, a diferencia de jupyter notebook, tiene un bug que hace que no se visualicen los gráficos con javascript en el notebook!
+Tras varios pruebas compruebo que la mejor opción es tener una máquina docker con jupyter con iruby, compartiendo la carpeta del proyecto.
+
+```sh
+docker run -d -it -p 8888:8888 --name jupyter-espiral --mount type=bind,source="$(pwd)",target=/home/jovyan/work rubydata/minimal-notebook
+
+docker logs jupyter-espiral
+```
+
+Con esta combinación sí que se dibujan gráficos:
+
+```ruby
+require 'daru/view'
+Daru::View.plotting_library = :highcharts
+
+@line_graph = Daru::View::Plot.new(
+        data=[43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
+)
+
+@line_graph.show_in_iruby
+```
+
+# Martes, 11 mayo 2021
+
+El desarrollo de herramientas para análisis científico se ha centrado en python porque se inició con IPython.
+Posteriormente ha surgido la iniciativa SciRuby que ha agrupado varias herramientas en Ruby.
+
+Estudio SciRuby, para, al menos, entender cómo funciona IRuby, daru, y daru-view, las principales que creo que necesito para analizar los datos de los parciales.
+
+Parece ser que "daru", que sería el sustituto de "pandas" no tiene las mismas prestaciones. Concretamente no permite representar gráficamente varias líneas de datos a la vez de forma automática.
+
+Vuelvo a instalar jupyter lab con python que, al final, pone la vida más fácil.
+
+Continuo estudiando "Learning IPython for Interactive Computing and Data Visualization" (Cyrille Rosant).
+
+# Miércoles, 12 mayo 2021
+
+Continuo estudiando "Learning IPython for Interactive Computing and Data Visualization" (Cyrille Rosant).
+
+# Jueves, 13 mayo 2021
+
+Continuo estudiando "Learning IPython for Interactive Computing and Data Visualization" (Cyrille Rosant).
+Parte gráfica interactiva.
+
+# Viernes, 14 mayo 2021
+
+Continuo estudiando "Learning IPython for Interactive Computing and Data Visualization" (Cyrille Rosant).
+Parte gráfica interactiva.
+
+Comienzo a pensar en cómo analizar los parciales de los instrumentos.
+
+- Agrupar los parciales en el pitch-class:
+  - contar el nº de parciales 
+  - intensidad por pitch-class
+  - coherencia de pitch (es decir, en parciales altos donde hay más parciales en una sola pitch class pero lo están de forma inexacta)
+  - tener en cuenta el rango de frecuencias en que el oído discrimina mejor la altura como notas?
+  
+Esto combinaría el timbre con la armonía y daría explicación de la compatibilidad entre timbres.
+
+- Predominancia relativa de frecuencias altas sobre bajas y medias (en escala logarítmica)
+
+# Lunes, 17 mayo 2021
+
+Pensando ya en las siguientes dimensiones está la articulación, ahora bien, la articulación
+tiene varios aspectos diferentes (cada tipo de articulación está vinculado a un componente diferente de la ejecución):
+
+- Ataque (ej: pizzicato, staccato, etc.)
+- "Cuerpo tímbrico" (cuivré, sul ponticello, etc.)
+- Modulación (vibrato, tremolo)
+- Intepretación (ej: double/triple tongue, legato)
+
+# Martes, 25 mayo 2021
+
+Más dimensiones:
+
+- Altura (pitch)
+- Intensidad (fff-ppp)
+- Timbre (a definir)
+- Articulación (ver lista anterior)
+- Posición vertical (cúpula)
+- Posición L/R
+- Posición adelante-atrás
+- Tiempo: tiempo lineal (compás)
+- Tiempo: duración de nota o silencio
+- Repetición de la nota varias veces
+- Patrón rítmico de la repetición de la nota (ej: lineal, exponencial)
+- Arpegio de las N últimas notas (1 = no arpegio)
+- Delay (espera respecto a otra espiral?)
+
+Idea sobre la composición: Mientras suena una espiral proyectada sobre algunas dimensiones (delante)
+que suene otra espiral sobre otras dimensiones (detrás) y con delay. P.ej. delante con legatos y detrás con ataques rápidos y notas breves
+
+# Miércoles, 26 mayo 2021
+
+Sigo haciendo fórmulas en Jupyter Lab para analizar las características espectrales de los instrumentos
+
+# Jueves, 27 mayo 2021
+
+Idem
+
+# Viernes, 28 mayo 2021
+
+Idem
+
+Tengo:
+- Intensidad de armónicos
+- Media ponderada de los armónicos
+- Distancia entre la fundamental y el armónico más intenso (dimensión)
+- Intensidad de armónicos agrupados según pitch-class
+- Promedio de intensidad de armónicos según pitch-class
+- Pitch-class promedio ponderado (dimensión, sirve de algo?--)
+- Consonancia-disonancia interna (dimensión)
+
+Estaría bien:
+- Diferenciar entre consonancia y disonancia (en lugar de sumar ambas)
+
+Falta tener en cuenta:
+- Armónicos que no caen razonablemente dentro de un pitch-class
+- Parciales no armónicos
+
+# Lunes, 31 mayo 2021
+
+Consonancia/disonancia interna según agrupación de las intensidades de los pitch-class y su ponderación por consonancia:
+
+De menos consonancia a más consonancia:
+
+- French horn
+- Piccolo (hay que considerarlo como una flauta aguda al no disponer de datos más allá del 12º armónico)
+- Bass clarinet
+- Flute
+- Contrabass
+- Violin
+- Viola
+- Oboe
+- Contrabass tuba
+- Trombone
+- Tuba
+- Contrabass trombone
+- Trumpet
+- English horn
+- Cello
+- Bassoon
+- Harpsichord
+- Clarinet
+
+# Martes, 1 junio 2021
+
+Es importante diferenciar entre dimensión y parámetro:
+- La dimensión está en el origen, en la espiral en 3D sobre 3 dimensiones.
+- El parámetro es aquello a lo que se traduce el valor de la dimensión. 
+
+Estoy visualizando la pieza como un grafo dirigido en que los nodos de origen son las dimensiones
+que se conectan a los parámetros (que a su vez se conectan con otros).
+
+La evolución de la pieza se produce porque la espiral de origen sufre transformaciones/clonaciones
+y van cambiando las conexiones entre las dimensiones y los parámetros.
+
+En esta visión me influye la lectura sobre las redes de Petri que hice el fin de semana (y el modelo procesual de los racks modulares y lenguajes gráficos como Max)
+
+Esta visión conlleva un desbordamiento de lo que he programado hasta ahora. La conexión entre dimensiones y parámetros, que a su vez se conectan con otros, implica extender la programación, probablemente incorporando más posibilidades a MusaDSL.
+
+El cambio de la vinculación entre dimensiones y parámetros, y entre parámetros, también puede estar sujeto al movimiento en las espirales (dimensiones)
