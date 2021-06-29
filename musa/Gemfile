@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'musa-dsl', '~> 0.23', '>= 0.23.0'
+gem 'musa-dsl', '~> 0.22', '>= 0.22.6'
 gem 'unimidi'
 gem 'mittsu'
