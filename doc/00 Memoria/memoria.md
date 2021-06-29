@@ -335,6 +335,26 @@ De menos consonancia a más consonancia:
 - Harpsichord
 - Clarinet
 
+Otros posibles parámetros:
+
+- Escala: cromática / diatónica / mayor / menor
+- Escala según secuencia natural (C C# D D# ...), armónica (C G D ...), cadencial (1 4 5 1, 1 5 4 1, ...)
+- Partir del registro medio del instrumento y tener la octava central +-1 octava
+- Instrumento según consonancia/disonancia interna
+- Intensidad absoluta, intensidad relativa (respecto a: nota anterior / otro instrumento / ...)
+- Tipo de ataque/acción: suave-agresivo (pizzicato, staccato, ..., legato)
+- Tipo de sonoridad: normal / cuivré / sul ponticello / ...
+- Modulación: vibrato / tremolo
+- Interpretación: legato / normal
+- Contraste: rápido/fuerte - lento/sutil
+- Espacialidad: adelante / atrás, l/r, arriba/abajo
+- Tiempo lineal
+- Duración de notas/silencios
+- Repeticiones de notas
+- Arpegio de las últimas N notas (1 = no arpegio)
+- Selección de patrón rítmico de la repetición/arpegio (lineal-exponencial, ...)
+- Tiempo: delay respecto a los eventos de la espiral
+- 
 # Martes, 1 junio 2021
 
 Es importante diferenciar entre dimensión y parámetro:
@@ -352,3 +372,95 @@ En esta visión me influye la lectura sobre las redes de Petri que hice el fin d
 Esta visión conlleva un desbordamiento de lo que he programado hasta ahora. La conexión entre dimensiones y parámetros, que a su vez se conectan con otros, implica extender la programación, probablemente incorporando más posibilidades a MusaDSL.
 
 El cambio de la vinculación entre dimensiones y parámetros, y entre parámetros, también puede estar sujeto al movimiento en las espirales (dimensiones)
+
+El desbordamiento me lleva a pensar en el objeto "Composer" que articule las series y operaciones desde una perspectiva de grafo dirigido (expresando un flujo) en lugar de en forma funcional.
+
+# Miércoles, 2 junio 2021
+
+El objeto "Composer" es un nuevo elemento en musadsl. Se trata de un desbordamiento-formalización que es interesante incorporar a musadsl. Esto puede ocurrirle a cualquier artista usuario de MusaDSL. Es necesario que defina un mecanismo para que otros usuarios de MusaDSL puedan crear nuevas formalizaciones/estructuras/paquetes y "registrarlas" en MusaDSL para que estén accesibles para todos los demás usuarios.
+Sería un sistema de repositorio de 2º nivel (el primer nivel es el de Ruby con las Gems).
+
+¿Qué sería necesario incluir en el repo?
+- Descripción
+- Forma de uso
+- Ejemplos
+- Compatibilidad con MusaDSL
+- Dependencias
+- Autor
+- Nombre
+- Version
+
+Varios de estos atributos son estándar en las gem, no haría falta replicarlos. ¿Los .gemspec son extensibles?
+
+RubyGems tiene un api que permite obtener las gems que tienen determinada dependencia:
+- https://guides.rubygems.org/rubygems-org-api/
+- GET - /api/v1/gems/GEM NAME/reverse_dependencies.json
+
+A partir de aquí los componentes para musa-dsl podrían tener una dependencia específica ("is-a-musadsl-component")
+
+# Jueves, 3 junio 2021
+
+Ayer, en el concierto para violín de Beethoven, se me ocurrieron varias cosas para Espiral.
+- duración 20-25 min
+- compuesta en ~60 pequeñas microsecciones
+- espiral abriéndose y luego cerrándose
+- usar la proyección de las dimensiones sobre los parámetros en diversas escalas temporales (macroestructura)
+- empezar con una espiral "obvia" para el público
+- terminar con una línea con un acorde menor
+- punto de menor identificación de la espiral en phi
+
+# Viernes, 4 junio 2021
+
+Estoy trabajando en el nuevo objeto "Composer" para combinar operaciones de series a través de un grafo. Veo que también tiene sentido que dentro de un "Composer" se usen otros "Composer", pues al final tienen entradas y salidas.
+
+# Lunes, 7 junio 2021
+
+Trabajando en "Composer".
+
+# Martes, 8 junio 2021
+
+Trabajando en "Composer". Revisando Series para permitir cambiar los orígenes y los parámetros.
+
+# Miércoles, 9 junio 2021
+
+Revisando Series para permitir cambiar los orígenes y los parámetros.
+
+# Jueves, 10 junio 2021
+
+Refactorizando Series.
+
+# Viernes, 11 junio 2021
+
+Identificado bug en deep-copy que afecta a .to_a en las series.
+
+# Lunes, 14 junio 2021
+
+Implementando WaitingBufferSerie para que las salidas de un pipeline de Composer se puedan enviar a diversas entradas de otras pipelines.
+
+# Martes, 15 junio 2021
+
+Idem.
+
+# Miércoles, 16 junio 2021
+
+Idem.
+
+Pensando también en la variante en que cada serie "hija" hace avanzar al principal en lugar de esperar sus valores.
+
+# Jueves, 17 junio 2021
+
+Implantando ParallelBufferSerie.
+
+# Viernes, 18 junio 2021
+
+Idem.
+
+# Hasta el 23 de junio
+
+Implementando y debugando "Composer".
+
+# Lunes, 28 junio 2021
+
+Haciendo los últimos casos de test para Composer. Faltará desasignar rutas.
+
+Ahora toca comenzar a implementar la orquestación en Live y a programar los drivers de los parámetros.
