@@ -5,7 +5,7 @@ require 'unimidi'
 require_relative 'probe-3d'
 require_relative 'render-musicxml'
 require_relative 'matrix-operations'
-require_relative 'violin'
+require_relative 'string-instruments-bbc'
 
 include Musa::Scales
 include Musa::Series
@@ -221,9 +221,12 @@ pp score
 #
 
 clock = TimerClock.new ticks_per_beat: 4, bpm: 90
-sequencer = Sequencer.new 4, 4
 
-sequencer.logger.info!
+sequencer = Sequencer.new 4, 4
+sequencer.logger.error!
+
+logger = sequencer.logger.clone
+logger.warn!
 
 #
 # 3D rendering setup and base drawing
@@ -247,12 +250,12 @@ cello_midi_voices = MIDIVoices.new(sequencer: sequencer, output: midi_output, ch
 violin = Violin.new('violin',
                     midi_voices: violin_midi_voices.voices,
                     tick_duration: sequencer.tick_duration,
-                    logger: sequencer.logger)
+                    logger: logger)
 
-cello = Violin.new('cello',
-                   midi_voices: cello_midi_voices.voices,
-                   tick_duration: sequencer.tick_duration,
-                   logger: sequencer.logger)
+cello = Cello.new('cello',
+                  midi_voices: cello_midi_voices.voices,
+                  tick_duration: sequencer.tick_duration,
+                  logger: logger)
 
 chromatic_scale = Scales.default_system.default_tuning.chromatic[0]
 

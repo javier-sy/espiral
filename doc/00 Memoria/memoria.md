@@ -464,3 +464,23 @@ Implementando y debugando "Composer".
 Haciendo los últimos casos de test para Composer. Faltará desasignar rutas.
 
 Ahora toca comenzar a implementar la orquestación en Live y a programar los drivers de los parámetros.
+
+Preparando el proyecto nuevo en Live, guardando versiones de lo hecho hasta ahora, etc.
+
+# Martes, 29 junio 2021
+
+Preparando los drivers para instrumentos.
+
+# Miércoles, 30 junio 2021
+
+Preparando los drivers para los instrumentos. Surge la problemática de que la librería BBC SO Pro
+tiene un único nivel jerárquico para identificar las articulaciones (el nº de keyswitch) mientras
+que lógicamente hay una jerarquía: 1r nivel legato/long/short, 2º nivel con sordina/flautando/... 3r nivel (trill) 2M/2m
+
+# Jueves, 1 julio 2021
+
+Preparando los drivers para instrumentos.
+
+# Viernes, 2 julio 2021
+
+Preparando los drivers para instrumentos.
