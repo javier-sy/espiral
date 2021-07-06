@@ -6,7 +6,7 @@ class Instrument
   include Helper
 
   def initialize(name, midi_voices:, tick_duration:, logger:)
-    @name = name
+    @name = name || self.class.name
     @midi_voices = midi_voices
     @tick_duration = tick_duration
     @logger = logger
@@ -23,12 +23,16 @@ class Instrument
     @central_pitch_range ||= @pitch_range # if no central pitch range is defined all the range is considered as central
 
     @harmonics_pitch_range ||= nil # if no harmonics are defined nil is used
+    @polyphony = 1 # by default only one note simultaneously
 
     cache_techniques
   end
 
   attr_reader :pitch_range
+  attr_reader :harmonics_pitch_range
   attr_reader :central_pitch_range
+
+  attr_reader :polyphony
 
   def techniques # returns canonic symbol id
     @technique_ids
@@ -54,7 +58,7 @@ class Instrument
     midi_voice = @voice_to_midi_voice_map[voice]
 
     if !midi_voice
-      midi_voice = @midi_voices.find { |voice| voice.active_pitches.all? { |_| _[:note_controls].empty? } }
+      midi_voice = @midi_voices.find { |voice| voice.active_pitches.count { |_| !_[:note_controls].empty? } < @polyphony }
     end
 
     if midi_voice

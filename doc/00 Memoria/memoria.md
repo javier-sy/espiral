@@ -484,3 +484,9 @@ Preparando los drivers para instrumentos.
 # Viernes, 2 julio 2021
 
 Preparando los drivers para instrumentos.
+Siguiente: Seguir con vientos.
+
+# Lunes, 5 julio 2021
+
+He completado viento madera y viento metal. He comenzado percusión afinada.
+Siguiente: seguir con percusión afinada.

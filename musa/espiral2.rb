@@ -2,6 +2,9 @@ require 'musa-dsl'
 require 'unimidi'
 
 require_relative 'string-instruments-bbc'
+require_relative 'ww-instruments-bbc'
+require_relative 'brass-instruments-bbc'
+require_relative 'tuned-percussions-bbc'
 
 include Musa::Scales
 include Musa::Series
@@ -23,7 +26,6 @@ logger = sequencer.logger.clone
 logger.info!
 
 #
-#
 # MIDI rendering
 #
 
@@ -32,13 +34,11 @@ midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[0]
 violin_midi_voices = MIDIVoices.new(sequencer: sequencer, output: midi_output, channels: 0..7, do_log: true)
 cello_midi_voices = MIDIVoices.new(sequencer: sequencer, output: midi_output, channels: 8..15)
 
-violin = Violin.new('violin',
-                    midi_voices: violin_midi_voices.voices,
+violin = Violin.new(midi_voices: violin_midi_voices.voices,
                     tick_duration: sequencer.tick_duration,
                     logger: logger)
 
-cello = Cello.new('cello',
-                  midi_voices: cello_midi_voices.voices,
+cello = Cello.new(midi_voices: cello_midi_voices.voices,
                   tick_duration: sequencer.tick_duration,
                   logger: logger)
 
