@@ -490,3 +490,15 @@ Siguiente: Seguir con vientos.
 
 He completado viento madera y viento metal. He comenzado percusión afinada.
 Siguiente: seguir con percusión afinada.
+
+# Martes, 6 julio 2021
+
+He completado los drivers de percusión afinada.
+He implementado todos los instrumentos de la orquesta en VEP y en Live y he conectado los nuevos puertos MIDI a Live.
+He comenzado a crear los midi_voices en espiral2.rb
+
+# Miércoles, 7 julio 2021
+
+Completados midi_voices y escala de instrumentos. Corregidos pequeños bugs.
+
+Conseguido generar una secuencia de una nota por cada instrumento.

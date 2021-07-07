@@ -28,6 +28,8 @@ class Instrument
     cache_techniques
   end
 
+  attr_reader :name
+
   attr_reader :pitch_range
   attr_reader :harmonics_pitch_range
   attr_reader :central_pitch_range
@@ -42,7 +44,7 @@ class Instrument
     @techniques_cache[id]
   end
 
-  def find_techniques(path) # returns a list of symbol id for techniques that match the path
+  def find_techniques(*path) # returns a list of techniques that match the path
     root = @techniques_cache.dig(*path)
     found = get_techniques(root)
     found.flatten.uniq
@@ -88,7 +90,7 @@ class Instrument
                 "#{techniques.inspect} "\
                 "#{voice_info}")
 
-    midi_voice.note technique.key_switch, duration: @tick_duration if technique
+    midi_voice.note technique.key_switch, duration: @tick_duration if technique && technique.key_switch > -1
     midi_voice.note pitch, duration: effective_duration, velocity: effective_velocity if midi_voice
   end
 
@@ -98,23 +100,26 @@ class Instrument
   end
 
   private def normalize(techniques)
-    techniques.transform_keys { |t| @techniques_cache[t].technique }
+    techniques&.transform_keys { |t| @techniques_cache[t].id }
   end
 
-  private def get_techniques(hash)
-    hash.values.collect do |element|
-      case element
-      when Hash
+  private def get_techniques(thing)
+    case thing
+    when Symbol
+      raise "NO SE QUE HACER AQUI"
+    when Hash
+      thing.values.collect do |element|
         get_techniques(element)
-      else
-        element.technique
       end
+    else
+      [thing]
     end
   end
 
   private def cache_techniques
     @techniques_cache = {}
     @technique_ids = []
+
     @techniques.each do |technique_ids, raw_info|
       canonic = nil
 
@@ -151,16 +156,16 @@ class Instrument
     end
   end
 
-  private def parse_info(technique, element)
+  private def parse_info(technique_id, element)
     case element
     when Numeric
-      TechniqueInfo.new(technique: technique, key_switch: element, modulators: [])
+      TechniqueInfo.new(id: technique_id, key_switch: element, modulators: [])
     when Hash
-      TechniqueInfo.new(technique: technique, **element)
+      TechniqueInfo.new(id: technique_id, **element)
     end
   end
 
-  TechniqueInfo = Struct.new(:technique, :key_switch, :modulators, keyword_init: true)
+  TechniqueInfo = Struct.new(:id, :key_switch, :modulators, keyword_init: true)
 
   private_constant :TechniqueInfo
 end

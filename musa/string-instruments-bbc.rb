@@ -4,7 +4,6 @@ require_relative 'string-instrument-bbc'
 
 class Violin < LeaderStringInstrument_BBC
   def initialize(name = nil, midi_voices:, tick_duration:, logger:)
-    name ||= 'Violin'
     @pitch_range = pitch("g3")..pitch("c#7")
     @harmonics_pitch_range = pitch("g5")..pitch("c#8")
 
@@ -14,7 +13,6 @@ end
 
 class Violins < SectionStringInstrument_BBC
   def initialize(name = nil, midi_voices:, tick_duration:, logger:)
-    name ||= 'Violins'
     @pitch_range = pitch("g3")..pitch("c#7")
     @harmonics_pitch_range = pitch("g5")..pitch("c#8")
 
@@ -24,7 +22,6 @@ end
 
 class Viola < LeaderStringInstrument_BBC
   def initialize(name = nil, midi_voices:, tick_duration:, logger:)
-    name ||= 'Viola'
     @pitch_range = pitch("c3")..pitch("f#6")
     @harmonics_pitch_range = pitch("c5")..pitch("f#7")
 
@@ -34,7 +31,6 @@ end
 
 class Violas < SectionStringInstrument_BBC
   def initialize(name = nil, midi_voices:, tick_duration:, logger:)
-    name ||= 'Violas'
     @pitch_range = pitch("c3")..pitch("f#6")
     @harmonics_pitch_range = pitch("c5")..pitch("f#7")
 
@@ -44,7 +40,6 @@ end
 
 class Cello < LeaderStringInstrument_BBC
   def initialize(name = nil, midi_voices:, tick_duration:, logger:)
-    name ||= 'Cello'
     @pitch_range = pitch("c2")..pitch("a#5")
     @harmonics_pitch_range = pitch("c4")..pitch("d#7")
 
@@ -63,7 +58,6 @@ end
 
 class Contrabass < LeaderStringInstrument_BBC
   def initialize(name = nil, midi_voices:, tick_duration:, logger:)
-    name ||= 'Contrabass'
     @pitch_range = pitch("c1")..pitch("f#3")
     @harmonics_pitch_range = pitch("c3")..pitch("f#5")
 
@@ -73,7 +67,6 @@ end
 
 class Contrabasses < SectionStringInstrument_BBC
   def initialize(name = nil, midi_voices:, tick_duration:, logger:)
-    name ||= 'Contrabasses'
     @pitch_range = pitch("c1")..pitch("f#3")
     @harmonics_pitch_range = pitch("c3")..pitch("f#5")
 
