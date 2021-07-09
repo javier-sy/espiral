@@ -1,4 +1,6 @@
 require 'matrix'
+require 'mittsu'
+
 require 'musa-dsl'
 
 class Probe3D
@@ -14,13 +16,13 @@ class Probe3D
     @scroll_means_move = false
     @scroll_means_zoom = false
 
-    @renderer = OpenGLRenderer.new width: 1024, height: 768, title: 'Matrix Probe'
+    @renderer = OpenGLRenderer.new width: 1600, height: 1024, title: 'Matrix Probe'
     @scene = Scene.new
 
-    @camera = PerspectiveCamera.new(75.0, (1024/768r).to_f, 0.1, 1000.0)
+    @camera = PerspectiveCamera.new(75.0, (1600/1024r).to_f, 0.1, 1000.0)
     @camera.position.z = 10.0
 
-    axis_colors = [0xff0000, 0x00ff00, 0x0000ff]
+    axis_colors = [0xff0000, 0x00ff00, 0xf0f0f0]
     material = axis_colors.collect { |c| LineBasicMaterial.new(color: c) }
     complementary_axis = [1, 0, 0]
 
@@ -61,8 +63,10 @@ class Probe3D
       if @scroll_means_move
         @root.position.x += offset.x / 20.0
         @root.position.y -= offset.y / 20.0
+
       elsif @scroll_means_zoom
         @root.position.z += offset.y / 50.0
+
       else
         @root.rotation.x -= offset.y / 100.0
 
@@ -94,6 +98,7 @@ class Probe3D
     @renderer.window.run do
       begin
         @renderer.render(@scene, @camera)
+
       rescue NoMethodError => e
         @logger.error e
       end

@@ -502,3 +502,13 @@ He comenzado a crear los midi_voices en espiral2.rb
 Completados midi_voices y escala de instrumentos. Corregidos pequeños bugs.
 
 Conseguido generar una secuencia de una nota por cada instrumento.
+Se encalla el note-off de glockenspiel y tubular bells... Por qué??
+
+# Jueves, 8 julio 2021
+
+El note-off que se encallaba era porque en la última nota paraba el clock y no se llegaban a emitir los últimos note-off.
+
+He estado trasladando una primera prueba de la espiral a multinstrumento.
+
+# Viernes, 9 julio 2021
+

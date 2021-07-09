@@ -7,12 +7,20 @@ require_relative 'brass-instruments-bbc'
 require_relative 'tuned-percussions-bbc'
 require_relative 'keyboard-instruments-pianoteq'
 
+require_relative 'probe-3d'
+require_relative 'matrix-operations'
+
+require_relative 'instruments-pool'
+
+include Musa::MIDIVoices
+include Musa::Clock
+include Musa::Sequencer
 include Musa::Scales
 include Musa::Series
 include Musa::Datasets
-include Musa::Clock
-include Musa::Sequencer
-include Musa::MIDIVoices
+
+using Musa::Extension::Matrix
+using Musa::Extension::InspectNice
 
 #
 # Sequencer setup
@@ -26,7 +34,7 @@ sequencer = Sequencer.new 4, 4
 # Logging setup
 #
 
-sequencer.logger.info!
+sequencer.logger.error!
 
 logger = sequencer.logger.clone
 logger.info!
@@ -117,7 +125,7 @@ harpsichord = FEBlanchetHarpsichord.new(midi_voices: harpshichord_midi_voices.vo
 
 #
 # Timbre scale for mostly harmonic instruments (sorted by incremental internal consonance)
-# Source: Personal investigation ("doc/Análisis espectral")
+# Source: personal investigation ("doc/Análisis espectral")
 #
 
 harmonic_timbres = [
@@ -147,58 +155,175 @@ non_harmonic_timbres = [marimba, vibraphone, tubular_bells, glockenspiel]
 
 all_timbres = harmonic_timbres + non_harmonic_timbres
 
+pool = InstrumentsPool.new(*all_timbres)
 
+#
+# Compute spiral 3D matrix
+#
 
+rows = []
+r = 0.0
+(0..1000).each do |z|
+  x = Math.sin(r) * z / 70.0
+  y = Math.cos(r) * z / 70.0
+  rows << [x, y, z / 20.0]
+  r += 0.1
+end
 
+m = Matrix[*rows]
 
+# Rotate matrix
+#
+# r = MatrixOperations.rotation(0.45, 1, 1, 0)
+# r = MatrixOperations.rotation(0.35, 0.5, 1, 0.3)
+# r = MatrixOperations.rotation(0.25, 0.1, 1, 0.1) # interesante
+r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0) # interesante
+# r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0)
 
+m = m * r
 
+#
+# Source quantization for MIDI
+#
 
+midi_quantized_timed_series =
+  m.to_p(time_dimension: 2, keep_time: true).collect do |line|
+    TIMED_UNION(
+      *line.to_timed_serie(time_start_component: 2, base_duration: 1)
+           .flatten_timed
+           .split
+           .to_a
+           .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
+           .collect { |_|
+             _.quantize(predictive: true, stops: false)
+              .anticipate { |_, c, n|
+                n ? c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] } :
+                  c } }
+    )
+  end
+
+#
+# Chromatic scale setup
+#
 
 chromatic_scale = Scales.default_system.default_tuning.chromatic[0]
 
-control = nil
+#
+# 3D rendering setup and base drawing
+#
 
-instruments = all_timbres.clone
+probe = Probe3D.new(10, logger: logger)
 
-sequencer.at 1 do
-  control = every 1/2r do
-    instrument = instruments.shift
+probe.render_matrix(m, color: 0xa0a0a0)
 
-    if instrument
-      note = { grade: 84,
-               duration: 1/2r,
-               velocity: 0.90,
-               voice: 1 }.extend(GDV)
-
-      technique = instrument.find_techniques(:legato).first
-      technique ||= instrument.find_techniques(:long).first
-      technique ||= instrument.find_techniques(:short).first
-
-      raise "Cannot find a technique for #{instrument.name}!!!!" unless technique
-
-      note[technique.id] = true
-
-      instrument.note **note.to_pdv(chromatic_scale).tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
-    else
-      control.stop
-      clock.stop
-    end
-  end
-end
+#
+# Rendering to midi
+#
 
 def put_in_pitch_range(instrument, pitch)
   if instrument.pitch_range.include?(pitch)
-    pitch
+    new_pitch = pitch
   else
-    puts "pitch #{pitch} no está incluido en el rango para #{instrument.name}... generando nota media"
-    instrument.pitch_range.minmax.sum / 2
+    new_pitch = (pitch % (instrument.pitch_range.max - instrument.pitch_range.min)) + instrument.pitch_range.min
+    logger.warn "pitch #{pitch} no está incluido en el rango para #{instrument.name}... generando nota #{new_pitch}"
   end
+
+  new_pitch
 end
 
-Thread.new { clock.run { sequencer.tick } }
+Thread.new do
+  coordinates = []
 
-sleep 0.2
-clock.start
+  sequencer.at 1 do
+    midi_quantized_timed_series.each_with_index do |quantized_timed_serie, i|
+      sequencer.play_timed quantized_timed_serie do |values, duration:|
 
-sleep 60
+        quantized_duration =
+          duration.collect { |d| sequencer.quantize_position(sequencer.position + d) - sequencer.position if d }
+
+        coordinates[i] = [values[0] || coordinates[i][0],
+                          values[1] || coordinates[i][1],
+                          sequencer.position - 1r]
+
+        probe.render_point(i, coordinates[i], color: 0x0fffff)
+
+        puts "values = #{values}"
+        if values[0]
+
+          # interpretamos los valores como [pitch/velocity, velocity/pitch, time]
+
+          note = { grade: (84 + values[0]).to_i,
+                   duration: quantized_duration[0],
+                   velocity: (coordinates[i][1] / 6r).to_i - 3,
+                   voice: i }.extend(GDV)
+
+          instrument = pool.find_free
+
+          technique = instrument.find_techniques(:legato).first
+          technique ||= instrument.find_techniques(:long).first
+          technique ||= instrument.find_techniques(:short).first
+
+          raise "Cannot find a technique for #{instrument.name}!!!!" unless technique
+
+          note[technique.id] = true
+
+          instrument.note **note.to_pdv(chromatic_scale).tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
+        end
+
+      end
+    end
+  end
+
+  Thread.new { clock.run { sequencer.tick } }
+
+  sleep 0.1
+  clock.start
+end
+
+probe.run
+clock.stop
+
+
+# control = nil
+#
+# instruments = all_timbres.clone
+#
+# sequencer.at 1 do
+#   control = every 1/4r do
+#     instrument = instruments.shift
+#
+#     if instrument
+#       note = { grade: 84,
+#                duration: 1r,
+#                velocity: 0.90,
+#                voice: 1 }.extend(GDV)
+#
+#       technique = instrument.find_techniques(:legato).first
+#       technique ||= instrument.find_techniques(:long).first
+#       technique ||= instrument.find_techniques(:short).first
+#
+#       raise "Cannot find a technique for #{instrument.name}!!!!" unless technique
+#
+#       note[technique.id] = true
+#
+#       instrument.note **note.to_pdv(chromatic_scale).tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
+#     else
+#       control.stop
+#     end
+#   end
+# end
+#
+#
+# Thread.new { clock.run { sequencer.tick } }
+#
+# sleep 0.2
+# clock.start
+#
+# sleep 1
+#
+# until sequencer.empty?
+#   sleep 1
+# end
+#
+# clock.stop
+

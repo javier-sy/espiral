@@ -50,6 +50,10 @@ class Instrument
     found.flatten.uniq
   end
 
+  def free_voices
+    @midi_voices.collect { |midi_voice| @polyphony - midi_voice.active_pitches.count { |_| !_[:note_controls].empty? } }.sum
+  end
+
   def note(pitch_note = nil, pitch: nil, voice:, duration:, velocity:, **techniques)
     pitch ||= pitch_note
     techniques = techniques.select { |_, v| v }
@@ -60,8 +64,10 @@ class Instrument
     midi_voice = @voice_to_midi_voice_map[voice]
 
     if !midi_voice
-      midi_voice = @midi_voices.find { |voice| voice.active_pitches.count { |_| !_[:note_controls].empty? } < @polyphony }
+      midi_voice = @midi_voices.find { |midi_voice| midi_voice.active_pitches.count { |_| !_[:note_controls].empty? } < @polyphony }
     end
+
+    # TODO cuando una misma midi_voice con polifonía recibe techniques diferentes para diferentes voices surge un conflicto. hay que controlarlo?
 
     if midi_voice
       @voice_to_midi_voice_map[voice] = midi_voice
