@@ -45,8 +45,8 @@ m = Matrix[*rows]
 # r = MatrixOperations.rotation(0.45, 1, 1, 0)
 # r = MatrixOperations.rotation(0.35, 0.5, 1, 0.3)
 # r = MatrixOperations.rotation(0.25, 0.1, 1, 0.1) # interesante
-# r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0) # interesante
-r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0)
+r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0) # interesante
+# r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0)
 
 m = m * r
 
@@ -61,7 +61,7 @@ midi_quantized_timed_series =
       TIMED_UNION(
           *line.to_timed_serie(time_start_component: 2, base_duration: 1)
                .flatten_timed
-               .split
+               .split.instance
                .to_a
                .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
                .collect { |_|
@@ -78,7 +78,7 @@ violin_quantized_array_of_timed_series =
           *line.to_timed_serie(time_start_component: 2, base_duration: 1)
                .map { |_| _.clone.tap { |_| _[:value][3] = (i % 8) + 1 } } # add instrument as line number
                .flatten_timed
-               .split
+               .split.instance
                .to_a
                .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
                .collect.with_index { |_, i|
@@ -105,7 +105,7 @@ cello_quantized_array_of_timed_series =
           *line.to_timed_serie(time_start_component: 2, base_duration: 1)
                .map { |_| _.clone.tap { |_| _[:value][3] = (i % 8) + 9 } } # add instrument as line number
                .flatten_timed
-               .split
+               .split.instance
                .to_a
                .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
                .collect.with_index { |_, i|
@@ -149,7 +149,7 @@ violin_score_quantized_timed_series =
                       instrument: _[:next_value][2] }
                   }.extend(AbsTimed)
           }.flatten_timed
-           .split
+           .split.instance
            .to_h
       )
     end
@@ -173,7 +173,7 @@ cello_score_quantized_timed_series =
                   instrument: _[:next_value][2] }
             }.extend(AbsTimed)
           }.flatten_timed
-                .split
+                .split.instance
                 .to_h
       )
     end

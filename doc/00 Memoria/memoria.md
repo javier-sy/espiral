@@ -548,5 +548,16 @@ Esto implica que Composer debe permitir no sólo operaciones de series sino oper
 
 # Lunes, 12 julio 2021
 
+Implementando operaciones no-series en los pipelines de Composer.
+
 # Martes, 13 julio 2021
 
+Detectado un fallo en los buffers.
+
+# Jueves, 15 julio 2021
+
+Sigo con el fallo en los buffers. Es un problema de .split al instanciar las series spliteadas. (se clonan los proxis cuando deberían tener el mismo proxy)
+
+# Martes, 16 julio 2021
+
+Idem.
