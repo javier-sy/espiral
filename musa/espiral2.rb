@@ -161,16 +161,7 @@ pool = InstrumentsPool.new(*all_timbres)
 # Compute spiral 3D matrix
 #
 
-rows = []
-r = 0.0
-(0..1000).each do |z|
-  x = Math.sin(r) * z / 70.0
-  y = Math.cos(r) * z / 70.0
-  rows << [x, y, z / 20.0]
-  r += 0.1
-end
-
-m = Matrix[*rows]
+m = MatrixOperations.spiral(1000)
 
 # Rotate matrix
 #
@@ -186,8 +177,10 @@ m = m * r
 # Source quantization for MIDI
 #
 
+matrix_p_array = m.to_p(time_dimension: 2, keep_time: true)
+
 midi_quantized_timed_series =
-  m.to_p(time_dimension: 2, keep_time: true).collect do |line|
+  matrix_p_array.collect do |line|
     TIMED_UNION(
       *line.to_timed_serie(time_start_component: 2, base_duration: 1)
            .flatten_timed

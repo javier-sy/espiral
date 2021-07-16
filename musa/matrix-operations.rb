@@ -1,6 +1,18 @@
 class MatrixOperations
-  def self.rotation(a, x, y, z)
+  def self.spiral(resolution)
+    rows = []
+    r = 0.0
+    (0..resolution-1).each do |z|
+      x = Math.sin(r) * z / 70.0
+      y = Math.cos(r) * z / 70.0
+      rows << [x, y, z / 20.0]
+      r += 0.1
+    end
 
+    Matrix[*rows]
+  end
+
+  def self.rotation(a, x, y, z)
     mod = (x**2r + y**2r + z**2r) ** (1/2r)
 
     l = x / mod

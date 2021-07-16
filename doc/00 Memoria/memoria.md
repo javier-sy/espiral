@@ -512,3 +512,41 @@ He estado trasladando una primera prueba de la espiral a multinstrumento.
 
 # Viernes, 9 julio 2021
 
+Estoy intentando entender cómo introducir el mecanismo para generar diferentes transformaciones mediante Composer.
+
+Hay varios problemas:
+- La matriz no es unitaria (todas las dimensiones deberían ser valores entre 0 y 1) sino que tiene valores para x, y, z con una escala más próxima a alturas y tiempo. Esto impide que los valores transformados puedan tener una escala arbitraria.  
+- En las transformaciones básicas de Matrix a TIMED_UNION cuantizadas se separa en varias partes el proceso: primero m.to_p, que extrae la dimensión temporal (y ya no se puede transformar, o sí?); luego la timed_union (que se ejecuta con play) tiene el tiempo sin transformar porque se excluye con tap { delete_at(2) }
+
+Vamos, es un lío (resoluble).
+
+Parece que la cuestión es que en...
+
+```
+matrix_p_array = m.to_p(time_dimension: 2, keep_time: true)
+
+midi_quantized_timed_series =
+  matrix_p_array.collect do |line|
+    TIMED_UNION(
+      *line.to_timed_serie(time_start_component: 2, base_duration: 1)
+           .flatten_timed
+           .split
+           .to_a
+           .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
+           .collect { |_|
+             _.quantize(predictive: true, stops: false)
+              .anticipate { |_, c, n|
+                n ? c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] } :
+                  c } }
+    )
+  end
+```
+
+... hay que pasar por Composer desde .split (incluido).
+
+Esto implica que Composer debe permitir no sólo operaciones de series sino operaciones de arrays (sólo en medio del pipeline, de modo que el pipeline comienze y acabe con una serie).
+
+# Lunes, 12 julio 2021
+
+# Martes, 13 julio 2021
+
