@@ -161,30 +161,30 @@ pool = InstrumentsPool.new(*all_timbres)
 # Compute spiral 3D matrix
 #
 
-m = MatrixOperations.spiral(1000)
+matrix = MatrixOperations.spiral(1000)
 
 # Rotate matrix
 #
 # r = MatrixOperations.rotation(0.45, 1, 1, 0)
 # r = MatrixOperations.rotation(0.35, 0.5, 1, 0.3)
 # r = MatrixOperations.rotation(0.25, 0.1, 1, 0.1) # interesante
-r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0) # interesante
+transformation = MatrixOperations.rotation(Math::PI/3, 0, 1, 0) # interesante
 # r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0)
 
-m = m * r
+matrix = matrix * transformation
 
 #
 # Source quantization for MIDI
 #
 
-matrix_p_array = m.to_p(time_dimension: 2, keep_time: true)
+p_array = matrix.to_p(time_dimension: 2, keep_time: true)
 
-midi_quantized_timed_series =
-  matrix_p_array.collect do |line|
+midi_quantized_timed_series_array =
+  p_array.collect do |p|
     TIMED_UNION(
-      *line.to_timed_serie(time_start_component: 2, base_duration: 1)
+      *p.to_timed_serie(time_start_component: 2, base_duration: 1)
            .flatten_timed
-           .split
+           .split.instance
            .to_a
            .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
            .collect { |_|
@@ -207,7 +207,7 @@ chromatic_scale = Scales.default_system.default_tuning.chromatic[0]
 
 probe = Probe3D.new(10, logger: logger)
 
-probe.render_matrix(m, color: 0xa0a0a0)
+probe.render_matrix(matrix, color: 0xa0a0a0)
 
 #
 # Rendering to midi
@@ -228,7 +228,7 @@ Thread.new do
   coordinates = []
 
   sequencer.at 1 do
-    midi_quantized_timed_series.each_with_index do |quantized_timed_serie, i|
+    midi_quantized_timed_series_array.each_with_index do |quantized_timed_serie, i|
       sequencer.play_timed quantized_timed_serie do |values, duration:|
 
         quantized_duration =
@@ -242,7 +242,6 @@ Thread.new do
 
         puts "values = #{values}"
         if values[0]
-
           # interpretamos los valores como [pitch/velocity, velocity/pitch, time]
 
           note = { grade: (84 + values[0]).to_i,

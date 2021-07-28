@@ -558,6 +558,39 @@ Detectado un fallo en los buffers.
 
 Sigo con el fallo en los buffers. Es un problema de .split al instanciar las series spliteadas. (se clonan los proxis cuando deberían tener el mismo proxy)
 
-# Martes, 16 julio 2021
+# Viernes, 16 julio 2021
 
 Idem.
+
+# Lunes, 19 julio 2021
+
+Sigo con Composer.
+
+# Martes, 20 julio 2021
+
+Sigo con Composer, para añadir posibilidad de ejecución lazy que permita combinar non-series operations y inputs asignadas a posteriori.
+
+# Miercoles, 21 julio 2021
+
+Idem.
+
+# Jueves, 22 julio 2021
+
+Al final estoy rehaciendo el Composer para que utilice encadenamiento de Proc's con la finalidad
+de hacer que todo el enlazamiento sea 'lazy'. Con eso evito que se ejecuten las pipelines antes de 
+tener inputs asignados, lo cual, si hay non-series operations, rompe el paso de los datos a través de la pipeline.
+
+# Viernes, 23 julio 2021
+
+Sigo con Composer.
+
+# Lunes, 26 julio 2021
+
+Sigo con Composer.
+
+# Martes, 27 julio 2021
+
+Terminado Composer. En principio ya funciona bien. Genero versión 0.23.4.
+
+
+

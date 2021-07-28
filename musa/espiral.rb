@@ -45,8 +45,8 @@ m = Matrix[*rows]
 # r = MatrixOperations.rotation(0.45, 1, 1, 0)
 # r = MatrixOperations.rotation(0.35, 0.5, 1, 0.3)
 # r = MatrixOperations.rotation(0.25, 0.1, 1, 0.1) # interesante
-r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0) # interesante
-# r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0)
+# r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0) # interesante
+r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0)
 
 m = m * r
 

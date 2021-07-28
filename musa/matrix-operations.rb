@@ -12,6 +12,8 @@ class MatrixOperations
     Matrix[*rows]
   end
 
+  # https://en.wikipedia.org/wiki/Transformation_matrix
+  #
   def self.rotation(a, x, y, z)
     mod = (x**2r + y**2r + z**2r) ** (1/2r)
 
