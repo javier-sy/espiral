@@ -181,22 +181,21 @@ p_array = matrix.to_p(time_dimension: 2, keep_time: true)
 
 midi_quantized_timed_series_array =
   p_array.collect do |voice|
-    TIMED_UNION(
-      *voice.to_timed_serie(time_start_component: 2, base_duration: 1).composer do
-        step flatten_timed,
-             split, instance,
-             to_a,
-             { tap: proc { |_| _.delete_at(2) } }, # we don't want time dimension itself to be quantized
-             { collect: proc { |_|
-               _.quantize(predictive: true, stops: false)
-                .anticipate { |_, c, n|
-                  n ? c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] } :
-                    c } } }
+    voice.to_timed_serie(time_start_component: 2, base_duration: 1).composer do
+      step flatten_timed,
+           split, instance,
+           to_a,
+           { tap: proc { |_| _.delete_at(2) } }, # we don't want time dimension itself to be quantized
+           { collect: proc { |_|
+             _.quantize(predictive: true, stops: false)
+              .anticipate { |_, c, n|
+                n ? c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] } :
+                  c } } },
+           :TIMED_UNION
 
-        route input, to: step
-        route step, to: output
-      end
-    )
+      route input, to: step
+      route step, to: output
+    end
   end
 
 #
