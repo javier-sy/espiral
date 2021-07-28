@@ -180,18 +180,22 @@ matrix = matrix * transformation
 p_array = matrix.to_p(time_dimension: 2, keep_time: true)
 
 midi_quantized_timed_series_array =
-  p_array.collect do |p|
+  p_array.collect do |voice|
     TIMED_UNION(
-      *p.to_timed_serie(time_start_component: 2, base_duration: 1)
-           .flatten_timed
-           .split.instance
-           .to_a
-           .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
-           .collect { |_|
-             _.quantize(predictive: true, stops: false)
-              .anticipate { |_, c, n|
-                n ? c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] } :
-                  c } }
+      *voice.to_timed_serie(time_start_component: 2, base_duration: 1).composer do
+        step flatten_timed,
+             split, instance,
+             to_a,
+             { tap: proc { |_| _.delete_at(2) } }, # we don't want time dimension itself to be quantized
+             { collect: proc { |_|
+               _.quantize(predictive: true, stops: false)
+                .anticipate { |_, c, n|
+                  n ? c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] } :
+                    c } } }
+
+        route input, to: step
+        route step, to: output
+      end
     )
   end
 
@@ -274,48 +278,4 @@ end
 
 probe.run
 clock.stop
-
-
-# control = nil
-#
-# instruments = all_timbres.clone
-#
-# sequencer.at 1 do
-#   control = every 1/4r do
-#     instrument = instruments.shift
-#
-#     if instrument
-#       note = { grade: 84,
-#                duration: 1r,
-#                velocity: 0.90,
-#                voice: 1 }.extend(GDV)
-#
-#       technique = instrument.find_techniques(:legato).first
-#       technique ||= instrument.find_techniques(:long).first
-#       technique ||= instrument.find_techniques(:short).first
-#
-#       raise "Cannot find a technique for #{instrument.name}!!!!" unless technique
-#
-#       note[technique.id] = true
-#
-#       instrument.note **note.to_pdv(chromatic_scale).tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
-#     else
-#       control.stop
-#     end
-#   end
-# end
-#
-#
-# Thread.new { clock.run { sequencer.tick } }
-#
-# sleep 0.2
-# clock.start
-#
-# sleep 1
-#
-# until sequencer.empty?
-#   sleep 1
-# end
-#
-# clock.stop
 

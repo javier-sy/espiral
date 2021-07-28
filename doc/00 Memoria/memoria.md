@@ -1,7 +1,5 @@
 # Sábado, 14 noviembre 2020
 
-
-
 - Hacer una doble cuantización genera glitches interesantes
 
 ```
