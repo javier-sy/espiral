@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 ruby '2.7.3'
 
-gem 'musa-dsl', '~> 0.23', '>= 0.23.5'
+gem 'musa-dsl', '~> 0.23', '>= 0.23.9'
 gem 'unimidi'
 
 gem 'mittsu'

@@ -588,7 +588,45 @@ Sigo con Composer.
 
 # Martes, 27 julio 2021
 
-Terminado Composer. En principio ya funciona bien. Genero versión 0.23.4.
+Sigo con Composer.
 
+# Miércoles, 28 julio 2021
 
+Terminado Composer. En principio ya funciona bien. Genero versión 0.23.5.
+Problemas con RubyMine al debugar espiral2.rb. Solucionados descargando el repo de nuevo...
 
+# Jueves, 29 julio 2021.
+
+Ajustes en Composer.
+
+# Viernes, 30 julio 2021.
+
+# Sábado, 31 julio 2021.
+
+# Lunes, 2 agosto 2021.
+
+Estos últimos días he estado haciendo que las series tengan un estado "undefined" 
+que corresponde a que aún no tienen su source/sources asignadas y no pueden decidir si 
+son prototype o instance.
+
+# Martes, 3 agosto 2021.
+
+Completadas las pruebas del estado "undefined" en las series y completado el composer teniendo en cuenta el nuevo estado y 
+su lógica. Subido a versión 0.23.9.
+
+# Miércoles, 4 agosto 2021.
+
+Estoy peleándome sobre cómo organizar la generación de la pieza.
+Hay problemas...
+- porque hay muchos parámetros que controlar (en cada parte de la pieza son diferentes),
+- porque cada parámetro implica una forma de generación diferente, 
+- porque quiero varios niveles organizativos
+estructurados por las espirales de los niveles superiores (con 3 niveles es suficiente, pero me atrae la idea 
+de una jerárquía con diferentes niveles de profundidad). 
+
+Esto me lleva a olvidar por el momento todo lo construído hasta ahora, pensar en el problema y luego volver a las herramientas 
+construídas. Espero que no me lleve a tener que crear más herramientas.
+
+También me doy cuenta que en cuanto haya repliegues de las espirales se multiplican las líneas (voces en el último nivel jerárquico) y 
+probablemente acabarán faltando instrumentos. Tendré que aplicar algún criterio y mecanismo de selección. Habrá un % de notas perdidas cuya 
+medición me ayudará a valorar el funcionamiento de las opciones que vaya eligiendo.

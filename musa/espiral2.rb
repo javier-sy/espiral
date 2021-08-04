@@ -161,14 +161,16 @@ pool = InstrumentsPool.new(*all_timbres)
 # Compute spiral 3D matrix
 #
 
-matrix = MatrixOperations.spiral(1000)
+phi = 1.6180339887499
+matrix = MatrixOperations.spiral(16, length: 50, radius_end: 14, resolution: 180)
+matrix = matrix.vstack MatrixOperations.spiral(16 / phi, z_start: 50, length: 50 / phi, radius_start: 14, radius_end: 0, resolution: 180)
 
 # Rotate matrix
 #
 # r = MatrixOperations.rotation(0.45, 1, 1, 0)
 # r = MatrixOperations.rotation(0.35, 0.5, 1, 0.3)
 # r = MatrixOperations.rotation(0.25, 0.1, 1, 0.1) # interesante
-transformation = MatrixOperations.rotation(Math::PI/3, 0, 1, 0) # interesante
+transformation = MatrixOperations.rotation(Math::PI / 3, 0, 1, 0) # interesante
 # r = MatrixOperations.rotation(Math::PI/3, 0, 1, 0)
 
 matrix = matrix * transformation
@@ -189,7 +191,8 @@ midi_quantized_timed_series_array =
            { collect: proc { |_|
              _.quantize(predictive: true, stops: false)
               .anticipate { |_, c, n|
-                n ? c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] } :
+                n ?
+                  c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] } :
                   c } } },
            :TIMED_UNION
 
