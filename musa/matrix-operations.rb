@@ -23,7 +23,7 @@ class MatrixOperations
     z = z_start.to_f
     z_step = length.to_f / steps
 
-    Matrix[*(0..steps).collect do |step|
+    Matrix[*(0..steps - 1).collect do |step|
       [Math.sin(2 * Math::PI * step / resolution) * radius,
        Math.cos(2 * Math::PI * step / resolution) * radius,
        z].tap do

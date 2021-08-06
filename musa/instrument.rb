@@ -1,9 +1,9 @@
-require_relative 'helper'
+require_relative 'instrument-helper'
 
 using Musa::Extension::InspectNice
 
 class Instrument
-  include Helper
+  include InstrumentHelper
 
   def initialize(name, midi_voices:, tick_duration:, logger:)
     @name = name || self.class.name

@@ -630,3 +630,18 @@ construídas. Espero que no me lleve a tener que crear más herramientas.
 También me doy cuenta que en cuanto haya repliegues de las espirales se multiplican las líneas (voces en el último nivel jerárquico) y 
 probablemente acabarán faltando instrumentos. Tendré que aplicar algún criterio y mecanismo de selección. Habrá un % de notas perdidas cuya 
 medición me ayudará a valorar el funcionamiento de las opciones que vaya eligiendo.
+
+# Jueves, 5 agosto 2021.
+
+He comenzado a plantear la solución a través de varios niveles de play, every, etc. en el sequencer.
+He comenzado a montar el render de la espiral basada en aumento hasta phi y reducción hasta el final.
+
+
+# Viernes, 6 agosto 2021.
+
+He implementado el nivel 0 y funciona bien. Habían surgido algunos problemas porque la espiral hacía 
+un retroceso temporal en el paso de la subida a la bajada pero no era de Musa sino de la función 
+generadora de espiral, que generaba un punto más de los necesarios al final.
+
+Al estar tan centrado en la perspectiva de intentar hacerlo todo desde una única p_serie no estaba
+viendo los recursos que ya tengo para implementar múltiples niveles. Ayer vi que tenía que simplificar.

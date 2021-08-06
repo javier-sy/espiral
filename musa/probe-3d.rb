@@ -8,7 +8,7 @@ class Probe3D
 
   include Mittsu
 
-  def initialize(axis_length, logger:)
+  def initialize(axis_length, z_scale: 1.0, logger:)
     super()
 
     @logger = logger
@@ -30,15 +30,18 @@ class Probe3D
 
     axis_mesh = Mesh.new
 
+    @scale = [1.0, 1.0, z_scale]
+    @scale_transformation = Matrix.column_vector(@scale)
+
     (0..2).each do |axis|
       geometry = Geometry.new
 
-      (0..axis_length-1).each do |position|
+      (0..axis_length - 1).each do |position|
         v0 = [0] * 3
-        v0[axis] = position
+        v0[axis] = position * @scale[axis]
 
         v1 = [0] * 3
-        v1[axis] = position + 1
+        v1[axis] = position * @scale[axis] + @scale[axis]
 
         v2 = v1.clone
         v2[complementary_axis[axis]] = -0.1
@@ -113,7 +116,8 @@ class Probe3D
     geometry = Geometry.new
 
     matrix._rows.each do |row|
-      geometry.vertices << Vector3.new(*row)
+      to_render = [row[0] * @scale[0], row[1] * @scale[1], row[2] * @scale[2]]
+      geometry.vertices << Vector3.new(*to_render)
     end
 
     mesh.add Line.new(geometry, material)
@@ -132,8 +136,9 @@ class Probe3D
       new_line = @lines[line_name] = Line.new(nil, material)
     end
 
-    new_line.geometry.vertices << Vector3.new(*point)
-    # puts "render_point: point #{point}"
+    to_render = [point[0] * @scale[0], point[1] * @scale[1], point[2] * @scale[2]]
+    new_line.geometry.vertices << Vector3.new(*to_render)
+
     @root.add new_line
   end
 end
