@@ -645,3 +645,45 @@ generadora de espiral, que generaba un punto más de los necesarios al final.
 
 Al estar tan centrado en la perspectiva de intentar hacerlo todo desde una única p_serie no estaba
 viendo los recursos que ya tengo para implementar múltiples niveles. Ayer vi que tenía que simplificar.
+
+# Lunes, 30 agosto 2021.
+
+Volvemos a la espiral. A ver si la termino ya...
+He refactorizado el código de espiral3 para comenzar a tenerlo más estructurado.
+Ha surgido un error rarísimo de que dentro del método _next_value de TimedUnionOfArrayOfTimedSeries no se ve el método Ha surgido un error rarísimo de que dentro del método _next_value de TimedUnionOfArrayOfTimedSeries no se ve el método infer_components de la misma clase
+  
+# Martes, 31 agosto 2021.
+
+Sigo con el error rarísimo. Alucinante. Parece un error relacionado con el private def _next_value, que NO ocurre en el contexto de las pruebas rspec.
+
+# Miércoles, 1 septiembre 2021.
+
+El error era porque en TimedUnionOfArrayOfTimedSeries el método infer_components estaba FUERA de la clase.
+Lo raro es que funcionara en otras ocasiones, lo cual era debido al uso generalizado de includes en la raíz de las pruebas rspec,
+que hacía que no se hubiera detectado.
+
+Estoy quitando todos los include en la raíz de las pruebas rspec, lo cual lleva a añadir el módulo en todos los usos de clases porque
+los "include" sólo importan clases cuando se está en el contexto de una clase.
+Podría funcionar extend? Comprobado que no.
+
+# Jueves, 2 septiembre 2021.
+
+He seguido quitando los include en los tests (y en el código principal de musa-dsl). También he reformateado y refactorizado algo de código.
+
+# Viernes, 3 septiembre 2021.
+
+Ya funciona de nuevo lo que funcionaba antes del refactor. También he resuelto un pequeño problema con musa::extension::with.
+Ahora ya toca volver a Espiral.
+El nivel 2 creo que sí que va a permitir dobleces temporales (aunque tendrán que ser pocas) para hacer más interesante la generación.
+
+# Lunes, 6 septiembre 2021.
+
+Preparando los niveles de forma agregada: el nivel 3 define el tamaño de los ciclos del nivel 2 y éste del nivel 1.
+Ha surgido un problema menor con la función Serie.map que me ha llevado a tener que cambiar algunas cosas en MusaDSL.
+
+# Martes, 7 septiembre 2021.
+
+Corrigiendo en musa los problemas derivados del cambio en Serie.map. Generada versión 0.23.15.
+
+
+

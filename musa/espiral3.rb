@@ -1,250 +1,142 @@
-require 'musa-dsl'
-require 'unimidi'
+require_relative 'espiral-instrumentation-3'
 
-require_relative 'string-instruments-bbc'
-require_relative 'ww-instruments-bbc'
-require_relative 'brass-instruments-bbc'
-require_relative 'tuned-percussions-bbc'
-require_relative 'keyboard-instruments-pianoteq'
-
-require_relative 'probe-3d'
 require_relative 'matrix-operations'
-require_relative 'helper'
-
-require_relative 'instruments-pool'
-
-include Musa::MIDIVoices
-include Musa::Clock
-include Musa::Sequencer
-include Musa::Scales
-include Musa::Series
-include Musa::Datasets
 
 using Musa::Extension::Matrix
-using Musa::Extension::InspectNice
 
-#
-# Sequencer setup
-#
+class EspiralV3 < EspiralInstrumentation3
+  include Musa::Scales
+  extend Musa::Series
+  include Musa::Series
+  include Musa::Datasets
 
-sequencer = Sequencer.new 4, 4
-# clock = TimerClock.new ticks_per_beat: 4, bpm: 90
-clock = DummyClock.new { !sequencer.empty? }
+  LEVEL2_SPIRALS = 13 # fibonacci serie 1 1 2 3 5 8 _13_ 21 34
+  LEVEL2_SPIRALS_BEFORE_INFLECTION = 8
 
-#
-# Logging setup
-#
+  LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE =
+    FIBO().max_size(LEVEL2_SPIRALS_BEFORE_INFLECTION) +
+    FIBO().skip(LEVEL2_SPIRALS - LEVEL2_SPIRALS_BEFORE_INFLECTION - 1).max_size(LEVEL2_SPIRALS - LEVEL2_SPIRALS_BEFORE_INFLECTION).reverse
 
-sequencer.logger.error!
+  LEVEL3_BARS_PER_TURN_SERIE =
+    (FIBO().max_size(LEVEL2_SPIRALS_BEFORE_INFLECTION).reverse +
+      FIBO().max_size(LEVEL2_SPIRALS - LEVEL2_SPIRALS_BEFORE_INFLECTION))
+      .map { |_| _ * 2 }
 
-logger = sequencer.logger.clone
-logger.info!
+  LEVEL2_BARS_PER_SPIRAL_SERIE = A(LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE, LEVEL3_BARS_PER_TURN_SERIE).map { |turns, bars| turns * bars }
 
-do_voices_log = true
+  LEVEL1_TURNS = 21 # fibonacci serie 1 1 2 3 5 8 13 _21_ 34
+  LEVEL1_TURNS_BEFORE_INFLECTION = 13
+  LEVEL1_BARS_PER_TURN = LEVEL2_BARS_PER_SPIRAL_SERIE.to_a.sum / LEVEL1_TURNS
 
-#
-# MIDI rendering setup
-#
+  puts "CONFIGURATION"
+  puts "-------------"
+  puts "LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE = #{LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE.to_a}"
+  puts "LEVEL3_BARS_PER_TURN_SERIE        = #{LEVEL3_BARS_PER_TURN_SERIE.to_a}"
+  puts
+  puts "LEVEL2_SPIRALS = #{LEVEL2_SPIRALS}"
+  puts "LEVEL2_SPIRALS_BEFORE_INFLECTION = #{LEVEL2_SPIRALS_BEFORE_INFLECTION}"
+  puts "LEVEL2_BARS_PER_SPIRAL_SERIE        = #{LEVEL2_BARS_PER_SPIRAL_SERIE.to_a}"
+  puts
+  puts "LEVEL1_TURNS = #{LEVEL1_TURNS}"
+  puts "LEVEL1_TURNS_BEFORE_INFLECTION = #{LEVEL1_TURNS_BEFORE_INFLECTION}"
+  puts "LEVEL1_BARS_PER_TURN = #{LEVEL1_BARS_PER_TURN}"
+  puts
 
-violins_midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[1]
-strings_midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[2]
-ww_midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[3]
-brass_midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[4]
-tuned_perc_midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[5]
+  def initialize(real_clock: false, do_voices_log: true)
+    super
 
-#
-# Strings definition
-#
+    # Compute level 1 spiral
+    #
+    level1_matrix = calculate_level1_matrix
+    @probe.render_matrix(level1_matrix, color: 0xa0a0a0)
 
-violin_midi_voices = MIDIVoices.new(sequencer: sequencer, output: violins_midi_output, channels: 1..8, do_log: do_voices_log)
-viola_midi_voices = MIDIVoices.new(sequencer: sequencer, output: strings_midi_output, channels: 1..4, do_log: do_voices_log)
-cello_midi_voices = MIDIVoices.new(sequencer: sequencer, output: strings_midi_output, channels: 5..8, do_log: do_voices_log)
-contrabass_midi_voices = MIDIVoices.new(sequencer: sequencer, output: strings_midi_output, channels: 9..12, do_log: do_voices_log)
+    level1_matrix_quantized_timed_series_array = quantize_matrix(level1_matrix)
 
-violin = Violin.new(midi_voices: violin_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-viola = Viola.new(midi_voices: viola_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-cello = Cello.new(midi_voices: cello_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-contrabass = Contrabass.new(midi_voices: contrabass_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
+    # level1_matrix_quantized_timed_series_array has only 1 element because level 1 spiral has no time folding
 
-#
-# Woodwinds definition
-#
-
-piccolo_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 1, do_log: do_voices_log)
-flute_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 2, do_log: do_voices_log)
-clarinet_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 3..4, do_log: do_voices_log)
-bass_clarinet_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 5, do_log: do_voices_log)
-oboe_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 6..7, do_log: do_voices_log)
-bassoon_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 8, do_log: do_voices_log)
-cor_anglais_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 9, do_log: do_voices_log)
-
-piccolo = Piccolo.new(midi_voices: piccolo_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-flute = Flute.new(midi_voices: flute_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-clarinet = Clarinet.new(midi_voices: clarinet_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-bass_clarinet = BassClarinet.new(midi_voices: bass_clarinet_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-oboe = Oboe.new(midi_voices: oboe_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-bassoon = Bassoon.new(midi_voices: bassoon_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-cor_anglais = CorAnglais.new(midi_voices: cor_anglais_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-
-#
-# Brass definition
-#
-
-french_horn_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 1..4, do_log: do_voices_log)
-trombone_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 5..6, do_log: do_voices_log)
-contrabass_trombone_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 7, do_log: do_voices_log)
-tuba_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 8, do_log: do_voices_log)
-trumpet_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 9, do_log: do_voices_log)
-
-french_horn = FrenchHorn.new(midi_voices: french_horn_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-trombone = TenorTrombone.new(midi_voices: trombone_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-contrabass_trombone = ContrabassTrombone.new(midi_voices: contrabass_trombone_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-tuba = Tuba.new(midi_voices: tuba_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-trumpet = Trumpet.new(midi_voices: trumpet_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-
-#
-# Tuned percussion
-#
-
-tubular_bells_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 1, do_log: do_voices_log)
-marimba_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 2, do_log: do_voices_log)
-glockenspiel_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 3, do_log: do_voices_log)
-vibraphone_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 4, do_log: do_voices_log)
-
-tubular_bells = TubularBells.new(midi_voices: tubular_bells_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-marimba = Marimba.new(midi_voices: marimba_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-glockenspiel = Glockenspiel.new(midi_voices: glockenspiel_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-vibraphone = Vibraphone.new(midi_voices: vibraphone_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-
-#
-# Blanchet Harpsichord
-#
-
-harpshichord_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 5, do_log: do_voices_log)
-
-harpsichord = FEBlanchetHarpsichord.new(midi_voices: harpshichord_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
-
-#
-# Timbre scale for mostly harmonic instruments (sorted by incremental internal consonance)
-# Source: personal investigation ("doc/Análisis espectral")
-#
-
-harmonic_timbres = [
-  bass_clarinet,
-  french_horn,
-  contrabass,
-  oboe,
-  flute,
-  violin,
-  viola,
-  cello,
-  contrabass_trombone,
-  piccolo,
-  trumpet,
-  cor_anglais,
-  bassoon,
-  harpsichord,
-  trombone,
-  tuba,
-  clarinet]
-
-#
-# Timbre scale for non-harmonic instruments (without order)
-#
-
-non_harmonic_timbres = [marimba, vibraphone, tubular_bells, glockenspiel]
-
-all_timbres = harmonic_timbres + non_harmonic_timbres
-
-pool = InstrumentsPool.new(*all_timbres)
-
-#
-# Compute spiral 3D matrix
-#
-
-phi = 1.6180339887499
-
-turns = 24
-bars_per_turn = 32
-length = turns * bars_per_turn
-
-phi_turns = (turns / phi).round
-phi_length = length / phi
-
-puts "turns = #{turns}"
-puts "bars_per_turn = #{bars_per_turn}"
-puts "length = #{length}"
-puts "phi_turns = #{phi_turns}"
-puts "phi_length = #{phi_length}"
-
-matrix1a = MatrixOperations.spiral(phi_turns, length: phi_length, radius_end: 10, resolution: 720)
-matrix1b = MatrixOperations.spiral(turns - phi_turns, z_start: phi_length, length: (length - phi_length), radius_start: 10, resolution: 720)
-matrix1 = matrix1a.vstack(matrix1b)
-
-#
-# Source quantization for MIDI
-#
-
-matrix1_p_array = matrix1.to_p(time_dimension: 2, keep_time: true)
-
-matrix1_quantized_timed_series_array = quantized_timed_series_of_p_array(matrix1_p_array, quantization_step: 0.5)
-
-# midi_quantized_timed_series_array has only 1 element because the spiral has no time folding
-#
-matrix1_quantized_timed_series = matrix1_quantized_timed_series_array.first
-
-#
-# 3D rendering setup and base drawing
-#
-
-probe = Probe3D.new(100, z_scale: 0.1, logger: logger)
-
-probe.render_matrix(matrix1, color: 0xa0a0a0)
-
-#
-# Engines on...
-#
-
-Thread.new do
-  sequencer.at 1 do
-
-    turns = 0
-    every_turn = sequencer.every bars_per_turn do
-      logger.info "turn #{turns}"
-      turns += 1
-    end
-
-    coordinates = [nil] * 3
-    play_matrix1 = sequencer.play_timed matrix1_quantized_timed_series do |values, duration:|
-      2.times { |i| coordinates[i] = values[i] if values[i] }
-      coordinates[2] = sequencer.position - 1r
-
-      # logger.info "rendering #{coordinates}"
-      probe.render_point('first level', coordinates, color: 0x0fffff)
-    end
-
-    play_matrix1.after do
-      logger.info "stopping"
-      every_turn.stop
-    end
-
+    @level1_matrix_quantized_timed_series = level1_matrix_quantized_timed_series_array.first
   end
 
-  Thread.new { clock.run { sequencer.tick } }
+  private def calculate_level1_matrix
+    length = LEVEL1_TURNS * LEVEL1_BARS_PER_TURN
 
-  sleep 0.1
-  begin
-    clock.start
-  rescue NoMethodError => e
-    puts "Ignoring #{e.message}"
+    inflection_length = LEVEL1_TURNS_BEFORE_INFLECTION * LEVEL1_BARS_PER_TURN
+
+    info "level 1 turns = #{LEVEL1_TURNS}"
+    info "level 1 bars_per_turn = #{LEVEL1_BARS_PER_TURN}"
+    info "level 1 length = #{length}"
+    info "level 1 inflection_turns = #{LEVEL1_TURNS_BEFORE_INFLECTION}"
+    info "level 1 inflection_length = #{inflection_length}"
+
+    matrix1a = MatrixOperations.spiral(LEVEL1_TURNS_BEFORE_INFLECTION, length: inflection_length, radius_end: 10, resolution: 720)
+    matrix1b = MatrixOperations.spiral(LEVEL1_TURNS - LEVEL1_TURNS_BEFORE_INFLECTION, z_start: inflection_length, length: (length - inflection_length), radius_start: 10, resolution: 720)
+
+    matrix1a.vstack(matrix1b)
+  end
+
+  private def quantize_matrix(matrix)
+    # Quantization of the matrix curves to MIDI compatible steps
+    #
+    matrix_p_array = matrix.to_p(time_dimension: 2, keep_time: true)
+
+    matrix_quantized_timed_series_array = quantized_timed_series_of_p_array(matrix_p_array, quantization_step: 0.5)
+
+    matrix_quantized_timed_series_array
+  end
+
+  private def quantized_timed_series_of_p_array(p_array, quantization_step: 0.1)
+    p_array.collect do |curve|
+      curve.to_timed_serie(time_start_component: 2, base_duration: 1)
+           .flatten_timed
+           .split.instance
+           .to_a
+           .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
+           .collect do |_|
+        # _.quantize(step: quantization_step, predictive: true, stops: false)
+        _.quantize(step: quantization_step, predictive: true, stops: false)
+         .anticipate do |_, c, n|
+          if n
+            c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] }
+          else
+            c
+          end
+        end
+      end.then { |_| TIMED_UNION(*_) }
+    end
+  end
+
+  def run(only_draw_matrixes: nil)
+    super() do
+      next if only_draw_matrixes
+
+      @sequencer.at 1 do
+        @turns = 0
+
+        every_turn = @sequencer.every LEVEL1_BARS_PER_TURN do
+          @logger.info "turn #{@turns}"
+          @turns += 1
+        end
+
+        coordinates = [nil] * 3
+
+        level1_play = @sequencer.play_timed @level1_matrix_quantized_timed_series do |values, duration:|
+
+          2.times { |i| coordinates[i] = values[i] if values[i] }
+          coordinates[2] = @sequencer.position - 1r
+
+          @probe.render_point('first level', coordinates, color: 0x0fffff)
+
+          @level1_x, @level1_y, @level1_z = coordinates
+        end
+
+        level1_play.after do
+          @logger.info "stopping"
+          every_turn.stop
+        end
+      end
+    end
   end
 end
 
-probe.run
-begin
-  clock.stop
-rescue NoMethodError => e
-  puts "Ignoring #{e.message}"
-end
-
+EspiralV3.new.run(only_draw_matrixes: true)
 
