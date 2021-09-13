@@ -22,7 +22,7 @@ class Probe3D
     @camera = PerspectiveCamera.new(75.0, (1600/1024r).to_f, 0.1, 1000.0)
     @camera.position.z = 10.0
 
-    axis_colors = [0xff0000, 0x00ff00, 0xf0f0f0]
+    axis_colors = [0xff0000, 0x0000ff, 0xf0f0f0]
     material = axis_colors.collect { |c| LineBasicMaterial.new(color: c) }
     complementary_axis = [1, 0, 0]
 

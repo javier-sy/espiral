@@ -685,5 +685,39 @@ Ha surgido un problema menor con la función Serie.map que me ha llevado a tener
 
 Corrigiendo en musa los problemas derivados del cambio en Serie.map. Generada versión 0.23.15.
 
+# Miércoles, 8 septiembre 2021.
 
+He conseguido visualizar las matrices de nivel 1 nivel 2. En las de nivel 2
+se pueden aplicar transformaciones y las encadena correctamente. Lo que pasa es que las transformacione aplicadas
+cambian la posición del eje temporal original y no respeta la duración necesaria, con lo que no se coinciden con las duraciones esperadas.
+
+Para resolver esto creo que hay que aplicar una normalización de la espiral, de modo que [0,0,0] quede en el centro geométrico de la espiral y que el "cubo" que la contiene tenga lados unitarios,
+luego aplicar la transformación, que creo que mantendrá el cubo unitario, y finalmente extender la transformación para que ocupe el tiempo y dimensiones necesarias.
+
+También se podría extender la espiral no en base al cubo unitario sino en base a los puntos de inicio y finalización de la espiral,
+lo cual podría hacer que otros puntos de la espiral cayeran fuera del cubo y ocuparan tiempos fuera de los asignados.
+
+# Jueves, 9 septiembre 2021.
+
+He implementado que la espiral sea unitaria, luego se rote, y luego se estire en z para que ocupe todo el tiempo que le toca y
+que se escale en x, y para que tenga la altura y anchura que le toca según el radio correspondiente.
+
+La idea es que las espirales de nivel 2 roten haciendo que el vector z roten hacia un vector v que se corresponda con un
+punto de otra espiral que va desarrollándose en el tiempo. Así las espirales de nivel 2 son como unas "peonzas" que se están desestabilizando y caen.
+
+Esto ha requerido investigar un poco de geometría y trigonometría.
+
+https://www.euclideanspace.com/maths/algebra/vectors/angleBetween/
+
+# Viernes, 10 septiembre 2021.
+
+He construido la espiral de nivel 2 con rotaciones orientadas según un vector también representado por otra espiral.
+He tenido que ir ajustando para que no haya un exceso de voces ni vueltas al pasado antes de que empiece la pieza!
+También he ajustado para tomar en cuenta phi como centro de interés donde pasan más cosas.
+
+# Lunes, 13 septiembre 2021.
+
+El nivel 2 ya está cuantizado correctamente. Tiene 23 curvas. La densidad máxima de curvas simultáneas es de 7.
+Ahora toca hacer las espirales de nivel 3: una espiral por curva, con varias vueltas (proporcional a la zona en que se encuentra) 
+y con giro con vector perpendicular al plano de la espiral de nivel 2?
 

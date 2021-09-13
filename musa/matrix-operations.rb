@@ -1,20 +1,7 @@
 require 'matrix'
 
 class MatrixOperations
-  # def self.spiral(resolution)
-  #   rows = []
-  #   r = 0.0
-  #   (0..resolution-1).each do |z|
-  #     x = Math.sin(r) * z / 70.0
-  #     y = Math.cos(r) * z / 70.0
-  #     rows << [x, y, z / 20.0]
-  #     r += 0.1
-  #   end
-  #
-  #   Matrix[*rows]
-  # end
-
-  def self.spiral(turns = 1, z_start: 0, length: 1, radius_start: 0, radius_end: 1, resolution: 360)
+  def self.spiral(turns = 1, z_start: 0, length: 1, radius_start: 0, radius_end: 1, resolution: 360, clockwise: true, last: false)
     steps = turns.to_f * resolution.round
 
     radius = radius_start.to_f
@@ -23,14 +10,19 @@ class MatrixOperations
     z = z_start.to_f
     z_step = length.to_f / steps
 
-    Matrix[*(0..steps - 1).collect do |step|
-      [Math.sin(2 * Math::PI * step / resolution) * radius,
-       Math.cos(2 * Math::PI * step / resolution) * radius,
-       z].tap do
-        radius += radius_step
-        z += z_step
-      end
-    end]
+    effective_steps = steps - (last ? 0 : 1)
+
+    Matrix[
+      *(0..effective_steps).collect do |step|
+        effective_step = clockwise ? -step : step
+
+        [Math.sin(2 * Math::PI * effective_step / resolution) * radius,
+         Math.cos(2 * Math::PI * effective_step / resolution) * radius,
+         z].tap do
+          radius += radius_step
+          z += z_step
+        end
+      end]
   end
 
 
@@ -47,6 +39,21 @@ class MatrixOperations
       [l*l*(1-Math.cos(a))+Math.cos(a),  m*l*(1-Math.cos(a))-n*Math.sin(a),  n*l*(1-Math.cos(a))+m*Math.sin(a)],
       [l*m*(1-Math.cos(a))+n*Math.sin(a), m*m*(1-Math.cos(a))+Math.cos(a), n*m*(1-Math.cos(a))-l*Math.sin(a)],
       [l*n*(1-Math.cos(a))-m*Math.sin(a), m*n*(1-Math.cos(a))+l*Math.sin(a), n*m*(1-Math.cos(a))+Math.cos(a)] ]
+  end
+
+  def self.rotate_z_to(x, y, z)
+    v1 = Vector[0, 0, 1]
+    t = Vector[x, y, z].normalize
+
+    angle = Math.acos(t.dot(v1))
+    axis = v1.cross(t)
+
+    if axis.zero?
+      Matrix.identity(3)
+    else
+      axis = axis.normalize
+      rotation(angle, axis[0], axis[1], axis[2])
+    end
   end
 
   def self.reflection(a, b, c)
