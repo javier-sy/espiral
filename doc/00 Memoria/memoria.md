@@ -721,3 +721,10 @@ El nivel 2 ya está cuantizado correctamente. Tiene 23 curvas. La densidad máxi
 Ahora toca hacer las espirales de nivel 3: una espiral por curva, con varias vueltas (proporcional a la zona en que se encuentra) 
 y con giro con vector perpendicular al plano de la espiral de nivel 2?
 
+# Martes, 14 septiembre 2021.
+
+He programado parte del nivel 3, que se basa en las curvas generadas desde el nivel 2. Las espirales de nivel 3 siguen a las curvas del nivel 2.
+
+# Miércoles, 15 septiembre 2021.
+
+Estoy haciendo que las espirales de nivel 3 tengan como eje los segmentos de nivel 2. Hay varias cosillas a tener en cuenta que afectan.

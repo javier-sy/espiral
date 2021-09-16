@@ -56,6 +56,12 @@ class EspiralV3 < EspiralInstrumentation3
     level2_matrix = calculate_level2_matrix
     @probe.render_matrix(level2_matrix, color: 0x00f00a)
 
+    level3_matrix_array = calculate_level3_matrix_array(level2_matrix)
+
+    level3_matrix_array[1..1].each do |level3_matrix|
+      @probe.render_matrix(level3_matrix, color: 0xf0f000)
+    end
+
     level1_matrix_quantized_timed_series_array = quantize_matrix(level1_matrix) # TODO: determinar valores máximos de x,y y la cuantización
     level2_matrix_quantized_timed_series_array = quantize_matrix(level2_matrix) # TODO: determinar valores máximos de x,y y la cuantización
 
@@ -86,7 +92,7 @@ class EspiralV3 < EspiralInstrumentation3
 
     end_point_correction = matrix1b.row(matrix1b.row_count - 1).normalize
 
-    matrix1a.vstack(matrix1b) * MatrixOperations.rotate_z_to(*end_point_correction)
+    matrix1a.vstack(matrix1b) * MatrixOperations.rotate_z_to(end_point_correction)
   end
 
   private def calculate_level2_matrix
@@ -115,7 +121,7 @@ class EspiralV3 < EspiralInstrumentation3
                                                       clockwise: false,
                                                       last: true))
 
-    @probe.render_matrix(rotation_target_spiral, color: 0xffffff)
+    # @probe.render_matrix(rotation_target_spiral, color: 0xffffff)
 
     accumulated_length = 0
 
@@ -134,22 +140,27 @@ class EspiralV3 < EspiralInstrumentation3
 
       accumulated_length += spiral_length
 
-      rotate_x, rotate_y, = rotation_target_spiral._rows.find { |_, _, z| z >= accumulated_length }
+      # Rotation vector corresponds to the vector from origin to the point of the spiral on this moment
+      # but with z rotation altered to increase the folding.
+      #
+      row_index = rotation_target_spiral._rows.find_index { |_, _, z| z > accumulated_length }
+
+      rotate_x, rotate_y, = rotation_target_spiral._rows[row_index]
 
       rotate_x ||= 0.0
       rotate_y ||= 0.0
       rotate_z = 1.1 - (rotate_x**2 + rotate_y**2)**(1/2r)
 
-      info "rotating to: x = #{rotate_x} y = #{rotate_y} z = #{rotate_z}"
+      info "level 2 spiral #{round} rotating to: x = #{rotate_x} y = #{rotate_y} z = #{rotate_z}"
 
       rotated_spiral =
         (spiral.unit_boxed *
-         MatrixOperations.rotate_z_to(rotate_x, rotate_y, rotate_z))
+         MatrixOperations.rotate_z_to(Vector[rotate_x, rotate_y, rotate_z]))
         .extend(MatrixCustomOperations)
-        .scale_end_to_end_only_axis_z_to(spiral_length)
+        .scale_end_to_end_only_z_axis_to(spiral_length)
         .scale_to(x: last_radius, y: last_radius)
 
-      info "rotated spiral: z length = #{(rotated_spiral.row(rotated_spiral.row_count - 1) - rotated_spiral.row(0))[2]}"
+      info "level 2 spiral #{round} rotated spiral: z length = #{(rotated_spiral.row(rotated_spiral.row_count - 1) - rotated_spiral.row(0))[2]}"
 
       offset = last_point - rotated_spiral.row(0)
 
@@ -164,22 +175,70 @@ class EspiralV3 < EspiralInstrumentation3
     end_point_correction = spirals.last.row(spirals.last.row_count - 1).normalize
 
     swapped = spirals.reduce(:vstack) *
-              MatrixOperations.rotate_z_to(*end_point_correction) *
+              MatrixOperations.rotate_z_to(end_point_correction) *
               MatrixOperations.rotation(Math::PI, 1, 0, 0)
 
     last_z = swapped.row(swapped.row_count - 1)[2]
 
-    swapped.extend(MatrixCustomOperations).move(0, 0, -last_z)
+    swapped.extend(MatrixCustomOperations).move(Vector[0, 0, -last_z])
   end
 
-  private def quantize_matrix(matrix)
+  private def calculate_level3_matrix_array(level2_matrix)
+    level2_matrix.to_p(time_dimension: 2, keep_time: true).collect.with_index do |curve_p, i|
+
+      next unless i == 1
+
+      curve_timed_serie_a = curve_p.to_timed_serie(base_duration: 1).to_a
+
+      start = Vector[*curve_timed_serie_a.first[:value]]
+      finish = Vector[*curve_timed_serie_a.last[:value]]
+
+      rotate_to = finish - start
+
+      duration = curve_timed_serie_a.last[:time] - curve_timed_serie_a.first[:time]
+
+      spiral = MatrixOperations.spiral(3,
+                                       radius_start: 0,
+                                       radius_end: 0,
+                                       length: 3,
+                                       resolution: 360).vstack(
+                                         MatrixOperations.spiral(2,
+                                                                 radius_start: 0,
+                                                                 radius_end: 0,
+                                                                 length: 2,
+                                                                 z_start: 3,
+                                                                 resolution: 360,
+                                                                 last: true))
+
+      info "level 3 curve #{i} l2 curve start = #{start} l2 curve finish = #{finish} l2 duration = #{duration}"
+      info "level 3 curve #{i} rotate_to = #{rotate_to}  curve magnitude = #{rotate_to.magnitude} "
+
+      spiral.extend(MatrixCustomOperations)
+
+      s = spiral.scale_end_to_end_only_z_axis_to(rotate_to.magnitude)
+      info "level 3 curve #{i} spiral start = #{s.row(0)} finish = #{s.row(s.row_count - 1)}"
+
+      s = s * MatrixOperations.rotate_z_to(rotate_to)
+
+      info "level 3 curve #{i} rotated spiral start = #{s.row(0)} finish = #{s.row(s.row_count - 1)}"
+
+      (spiral.scale_end_to_end_only_z_axis_to(rotate_to.magnitude) * MatrixOperations.rotate_z_to(rotate_to))
+        .extend(MatrixCustomOperations)
+        .move(Vector[0, 0, start[2]])
+        # .add_over_z_axis(curve_timed_serie_a)
+        .tap do |_|
+
+        # info "level 3 curve #{i} starts at #{_.row(0)} finish at #{_.row(_.row_count-1)}"
+      end
+    end
+  end
+
+  private def quantize_matrix(matrix, quantization_step = 0.5)
     # Quantization of the matrix curves to MIDI compatible steps
     #
     matrix_p_array = matrix.to_p(time_dimension: 2, keep_time: true)
 
-    matrix_quantized_timed_series_array = quantized_timed_series_of_p_array(matrix_p_array, quantization_step: 0.5)
-
-    matrix_quantized_timed_series_array
+    quantized_timed_series_of_p_array(matrix_p_array, quantization_step: quantization_step)
   end
 
   private def quantized_timed_series_of_p_array(p_array, quantization_step: 0.1)
@@ -269,5 +328,5 @@ class EspiralV3 < EspiralInstrumentation3
   end
 end
 
-EspiralV3.new.run(only_draw_matrixes: false)
+EspiralV3.new.run(only_draw_matrixes: true)
 

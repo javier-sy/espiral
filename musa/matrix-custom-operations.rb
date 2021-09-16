@@ -1,10 +1,34 @@
 module MatrixCustomOperations
-  def move(x, y, z)
+  def move(vector)
     new_rows = @rows.collect do |row|
-      [row[0] + x, row[1] + y, row[2] + z]
+      [row[0] + vector[0], row[1] + vector[1], row[2] + vector[2]]
     end
 
     Matrix.rows(new_rows).extend(MatrixCustomOperations)
+  end
+
+  def add_over_z_axis(timed_serie_a)
+    @rows.collect do |point|
+      target_i = timed_serie_a.find_index { |timed_element| timed_element[:value][2] > point[2] }
+      target_i ||= timed_serie_a.size - 1
+
+      target_i_pre = target_i - 1 if target_i > 0
+      target_i_pre ||= target_i
+
+      target_current = timed_serie_a[target_i][:value]
+      target_pre = timed_serie_a[target_i_pre][:value]
+
+      diff = 3.times.collect { |i| target_current[i] - target_pre[i] }
+
+      offset = diff[2].zero? ? 0 : (point[2] - target_pre[2]) / diff[2]
+
+      [point[0] + target_pre[0] + diff[0] * offset,
+       point[1] + target_pre[1] + diff[1] * offset,
+       point[2]]
+    end
+    .then do |new_rows|
+      Matrix.rows(new_rows).extend(MatrixCustomOperations)
+    end
   end
 
   def unit_boxed
@@ -27,7 +51,7 @@ module MatrixCustomOperations
     Matrix.rows(new_rows).extend(MatrixCustomOperations)
   end
 
-  def scale_end_to_end_only_axis_z_to(length)
+  def scale_end_to_end_only_z_axis_to(length)
     first_z = row(0)[2]
     last_z = row(row_count - 1)[2]
 

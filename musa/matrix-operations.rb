@@ -41,17 +41,20 @@ class MatrixOperations
       [l*n*(1-Math.cos(a))-m*Math.sin(a), m*n*(1-Math.cos(a))+l*Math.sin(a), n*m*(1-Math.cos(a))+Math.cos(a)] ]
   end
 
-  def self.rotate_z_to(x, y, z)
+  def self.rotate_z_to(vector)
     v1 = Vector[0, 0, 1]
-    t = Vector[x, y, z].normalize
+    t = vector.normalize
 
     angle = Math.acos(t.dot(v1))
-    axis = v1.cross(t)
+    axis = v1.cross(t) # OJO, hasta ahora funcionaba invirtiendo el orden de los factores
+    # axis = t.cross(v1)
+
 
     if axis.zero?
       Matrix.identity(3)
     else
       axis = axis.normalize
+      puts "calculating rotate_z_to(#{t}): angle = #{angle} axis = #{axis}"
       rotation(angle, axis[0], axis[1], axis[2])
     end
   end
