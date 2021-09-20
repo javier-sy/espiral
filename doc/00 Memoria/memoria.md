@@ -728,3 +728,10 @@ He programado parte del nivel 3, que se basa en las curvas generadas desde el ni
 # Miércoles, 15 septiembre 2021.
 
 Estoy haciendo que las espirales de nivel 3 tengan como eje los segmentos de nivel 2. Hay varias cosillas a tener en cuenta que afectan.
+
+# Jueves, 16 septiembre 2021.
+
+Sigo con ello.
+Ya renderiza hasta el nivel 3 con las cuantizaciones por defecto.
+
+

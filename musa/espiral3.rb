@@ -58,7 +58,7 @@ class EspiralV3 < EspiralInstrumentation3
 
     level3_matrix_array = calculate_level3_matrix_array(level2_matrix)
 
-    level3_matrix_array[1..1].each do |level3_matrix|
+    level3_matrix_array.each do |level3_matrix|
       @probe.render_matrix(level3_matrix, color: 0xf0f000)
     end
 
@@ -67,13 +67,20 @@ class EspiralV3 < EspiralInstrumentation3
 
     # level1_matrix_quantized_timed_series_array has only 1 element because level 1 spiral has no time folding
     #
-    @level1_matrix_quantized_timed_series = level1_matrix_quantized_timed_series_array.first
+    @level1_matrix_quantized_timed_serie = level1_matrix_quantized_timed_series_array.first
 
     # level2_matrix_quantized_timed_series_array has several timed series because level 2 has time folding spirals
     #
     @level2_matrix_quantized_timed_series = level2_matrix_quantized_timed_series_array
 
-    info "level 2 matrix has #{@level2_matrix_quantized_timed_series.size} timed series"
+    # level3
+    #
+    @level3_matrix_quantized_timed_series_array = level3_matrix_array.collect.with_index do |level3_matrix|
+      quantize_matrix(level3_matrix)
+    end
+
+
+    info "level 2 matrix has #{@level2_matrix_quantized_timed_series.size} timed series (#{level3_matrix_array.size} level 3 matrixes)"
   end
 
   private def calculate_level1_matrix
@@ -121,7 +128,7 @@ class EspiralV3 < EspiralInstrumentation3
                                                       clockwise: false,
                                                       last: true))
 
-    # @probe.render_matrix(rotation_target_spiral, color: 0xffffff)
+    @probe.render_matrix(rotation_target_spiral, color: 0xffffff)
 
     accumulated_length = 0
 
@@ -149,7 +156,7 @@ class EspiralV3 < EspiralInstrumentation3
 
       rotate_x ||= 0.0
       rotate_y ||= 0.0
-      rotate_z = 1.1 - (rotate_x**2 + rotate_y**2)**(1/2r)
+      rotate_z = 1.25 - (rotate_x**2 + rotate_y**2)**(1/2r)
 
       info "level 2 spiral #{round} rotating to: x = #{rotate_x} y = #{rotate_y} z = #{rotate_z}"
 
@@ -172,21 +179,14 @@ class EspiralV3 < EspiralInstrumentation3
       round += 1
     end
 
-    end_point_correction = spirals.last.row(spirals.last.row_count - 1).normalize
+    end_point = spirals.last.row(spirals.last.row_count - 1)
+    end_point_correction = Vector[-end_point[0], -end_point[1], end_point[2]]
 
-    swapped = spirals.reduce(:vstack) *
-              MatrixOperations.rotate_z_to(end_point_correction) *
-              MatrixOperations.rotation(Math::PI, 1, 0, 0)
-
-    last_z = swapped.row(swapped.row_count - 1)[2]
-
-    swapped.extend(MatrixCustomOperations).move(Vector[0, 0, -last_z])
+    spirals.reduce(:vstack) * MatrixOperations.rotate_z_to(end_point_correction)
   end
 
   private def calculate_level3_matrix_array(level2_matrix)
     level2_matrix.to_p(time_dimension: 2, keep_time: true).collect.with_index do |curve_p, i|
-
-      next unless i == 1
 
       curve_timed_serie_a = curve_p.to_timed_serie(base_duration: 1).to_a
 
@@ -199,36 +199,27 @@ class EspiralV3 < EspiralInstrumentation3
 
       spiral = MatrixOperations.spiral(3,
                                        radius_start: 0,
-                                       radius_end: 0,
+                                       radius_end: 3,
                                        length: 3,
                                        resolution: 360).vstack(
                                          MatrixOperations.spiral(2,
-                                                                 radius_start: 0,
+                                                                 radius_start: 3,
                                                                  radius_end: 0,
                                                                  length: 2,
                                                                  z_start: 3,
                                                                  resolution: 360,
                                                                  last: true))
 
-      info "level 3 curve #{i} l2 curve start = #{start} l2 curve finish = #{finish} l2 duration = #{duration}"
-      info "level 3 curve #{i} rotate_to = #{rotate_to}  curve magnitude = #{rotate_to.magnitude} "
-
       spiral.extend(MatrixCustomOperations)
-
-      s = spiral.scale_end_to_end_only_z_axis_to(rotate_to.magnitude)
-      info "level 3 curve #{i} spiral start = #{s.row(0)} finish = #{s.row(s.row_count - 1)}"
-
-      s = s * MatrixOperations.rotate_z_to(rotate_to)
-
-      info "level 3 curve #{i} rotated spiral start = #{s.row(0)} finish = #{s.row(s.row_count - 1)}"
 
       (spiral.scale_end_to_end_only_z_axis_to(rotate_to.magnitude) * MatrixOperations.rotate_z_to(rotate_to))
         .extend(MatrixCustomOperations)
-        .move(Vector[0, 0, start[2]])
+        .move(start)
+        # .move(Vector[0, 0, start[2]])
         # .add_over_z_axis(curve_timed_serie_a)
         .tap do |_|
 
-        # info "level 3 curve #{i} starts at #{_.row(0)} finish at #{_.row(_.row_count-1)}"
+        info "level 3 curve #{i} starts at #{_.row(0)} finish at #{_.row(_.row_count-1)}"
       end
     end
   end
@@ -274,7 +265,7 @@ class EspiralV3 < EspiralInstrumentation3
           @turns += 1
         end
 
-        level1_play = @sequencer.play_timed @level1_matrix_quantized_timed_series do |values, duration:|
+        level1_play = @sequencer.play_timed @level1_matrix_quantized_timed_serie do |values, duration:|
           @level1_x = values[0] if values[0]
           @level1_y = values[1] if values[1]
           @level1_z = @sequencer.position - 1r
@@ -290,7 +281,7 @@ class EspiralV3 < EspiralInstrumentation3
         @level2_x = []
         @level2_y = []
         @level2_z = []
-        @active = []
+        @level2_active = []
 
         level2_plays = @level2_matrix_quantized_timed_series.collect.with_index do |level2_matrix_quantized_timed_serie, i|
 
@@ -303,9 +294,9 @@ class EspiralV3 < EspiralInstrumentation3
           info "level 2 curve #{i} starts at #{start} (#{start.to_f}) with durations #{duration_x} #{duration_y}"
 
           @sequencer.play_timed level2_matrix_quantized_timed_serie do |values, duration:|
-            unless @active[i]
-              @active[i] = true
-              info "starting level 2 curve #{i} (#{@active.select {|_|_}.count} actives)"
+            unless @level2_active[i]
+              @level2_active[i] = true
+              info "starting level 2 curve #{i} (#{@level2_active.select {|_|_}.count} actives on level 2)"
             end
 
             @level2_x[i] = values[0] if values[0]
@@ -319,8 +310,48 @@ class EspiralV3 < EspiralInstrumentation3
 
         level2_plays.each.with_index do |level2_play, i|
           level2_play.after do
-            @logger.info "finished level 2 curve #{i} (#{@active.select {|_|_}.count} actives)"
-            @active[i] = false
+            @level2_active[i] = false
+            @logger.info "finished level 2 curve #{i} (remaining #{@level2_active.select {|_|_}.count} actives on level 2)"
+          end
+        end
+
+        @level3_x = []
+        @level3_y = []
+        @level3_z = []
+        @level3_active = []
+
+        level3_plays_array = @level3_matrix_quantized_timed_series_array.collect.with_index do |level3_matrix_quantized_timed_series, level2_i|
+          level3_matrix_quantized_timed_series.collect.with_index do |level3_matrix_quantized_time_serie, i|
+            @sequencer.play_timed level3_matrix_quantized_time_serie do |values, duration:|
+
+              @level3_x[level2_i] ||= []
+              @level3_y[level2_i] ||= []
+              @level3_z[level2_i] ||= []
+
+              @level3_active[level2_i] ||= []
+
+              unless @level3_active[level2_i][i]
+                @level3_active[level2_i][i] = true
+                info "starting level 3 #{level2_i}-#{i} (#{@level3_active.flatten.select {|_|_}.count} actives on level 3)"
+              end
+
+              @level3_x[level2_i][i] = values[0] if values[0]
+              @level3_y[level2_i][i] = values[1] if values[1]
+              @level3_z[level2_i][i] = @sequencer.position - 1r
+
+              @probe.render_point("second level line #{level2_i} third level #{i}", [@level3_x[level2_i][i], @level3_y[level2_i][i], @level3_z[level2_i][i]], color: 0xffa0a0)
+
+
+            end
+          end
+        end
+
+        level3_plays_array.size.times do |level2_i|
+          level3_plays_array[level2_i].each.with_index do |level3_play, i|
+            level3_play.after do
+              @level3_active[level2_i][i] = false
+              @logger.info "finished level 3 #{level2_i}-#{i} (remaining #{@level3_active.flatten.select {|_|_}.count} actives on level 3)"
+            end
           end
         end
       end

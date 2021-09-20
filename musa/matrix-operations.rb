@@ -46,15 +46,13 @@ class MatrixOperations
     t = vector.normalize
 
     angle = Math.acos(t.dot(v1))
-    axis = v1.cross(t) # OJO, hasta ahora funcionaba invirtiendo el orden de los factores
-    # axis = t.cross(v1)
+    axis = t.cross(v1)
 
 
     if axis.zero?
       Matrix.identity(3)
     else
       axis = axis.normalize
-      puts "calculating rotate_z_to(#{t}): angle = #{angle} axis = #{axis}"
       rotation(angle, axis[0], axis[1], axis[2])
     end
   end
