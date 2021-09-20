@@ -1,4 +1,4 @@
-require_relative 'espiral-base-3'
+require_relative 'composition-base'
 
 require_relative 'string-instruments-bbc'
 require_relative 'ww-instruments-bbc'
@@ -8,7 +8,7 @@ require_relative 'keyboard-instruments-pianoteq'
 
 require_relative 'instruments-pool'
 
-class EspiralInstrumentation3 < EspiralBase3
+class CompositionWithInstrumentation < CompositionBase
   def initialize(real_clock: false, do_voices_log: true)
     super
 
@@ -126,9 +126,9 @@ class EspiralInstrumentation3 < EspiralBase3
 
     # Timbre scale for non-harmonic instruments (without order)
     #
-    non_harmonic_timbres = [@marimba, @vibraphone, @tubular_bells, @glockenspiel]
+    less_harmonic_timbres = [@marimba, @vibraphone, @tubular_bells, @glockenspiel]
 
-    [harmonic_timbres, non_harmonic_timbres]
+    [harmonic_timbres, less_harmonic_timbres]
   end
 
 end

@@ -1,11 +1,11 @@
-require_relative 'espiral-instrumentation-3'
+require_relative 'composition-instrumentation'
 
 require_relative 'matrix-operations'
 require_relative 'matrix-custom-operations'
 
 using Musa::Extension::Matrix
 
-class EspiralV3 < EspiralInstrumentation3
+class CompositionWithSpirals < CompositionWithInstrumentation
   include Musa::Scales
   extend Musa::Series
   include Musa::Series
@@ -30,23 +30,23 @@ class EspiralV3 < EspiralInstrumentation3
   LEVEL1_BARS_PER_TURN = LEVEL2_BARS_PER_SPIRAL_SERIE.to_a.sum / LEVEL1_ASKED_TURNS
   LEVEL1_TURNS = LEVEL2_BARS_PER_SPIRAL_SERIE.to_a.sum / LEVEL1_BARS_PER_TURN.to_f
 
-  puts "CONFIGURATION"
-  puts "-------------"
-  puts "LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE = #{LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE.to_a}"
-  puts "LEVEL3_BARS_PER_TURN_SERIE        = #{LEVEL3_BARS_PER_TURN_SERIE.to_a}"
-  puts
-  puts "LEVEL2_SPIRALS = #{LEVEL2_SPIRALS}"
-  puts "LEVEL2_SPIRALS_BEFORE_INFLECTION = #{LEVEL2_SPIRALS_BEFORE_INFLECTION}"
-  puts "LEVEL2_BARS_PER_SPIRAL_SERIE        = #{LEVEL2_BARS_PER_SPIRAL_SERIE.to_a}"
-  puts
-  puts "LEVEL1_ASKED_TURNS = #{LEVEL1_ASKED_TURNS}"
-  puts "LEVEL1_TURNS = #{LEVEL1_TURNS}"
-  puts "LEVEL1_TURNS_BEFORE_INFLECTION = #{LEVEL1_TURNS_BEFORE_INFLECTION}"
-  puts "LEVEL1_BARS_PER_TURN = #{LEVEL1_BARS_PER_TURN}"
-  puts
-
   def initialize(real_clock: false, do_voices_log: true)
     super
+
+    puts "SPIRALS CONFIGURATION"
+    puts "---------------------"
+    puts "LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE = #{LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE.to_a}"
+    puts "LEVEL3_BARS_PER_TURN_SERIE        = #{LEVEL3_BARS_PER_TURN_SERIE.to_a}"
+    puts
+    puts "LEVEL2_SPIRALS = #{LEVEL2_SPIRALS}"
+    puts "LEVEL2_SPIRALS_BEFORE_INFLECTION = #{LEVEL2_SPIRALS_BEFORE_INFLECTION}"
+    puts "LEVEL2_BARS_PER_SPIRAL_SERIE        = #{LEVEL2_BARS_PER_SPIRAL_SERIE.to_a}"
+    puts
+    puts "LEVEL1_ASKED_TURNS = #{LEVEL1_ASKED_TURNS}"
+    puts "LEVEL1_TURNS = #{LEVEL1_TURNS}"
+    puts "LEVEL1_TURNS_BEFORE_INFLECTION = #{LEVEL1_TURNS_BEFORE_INFLECTION}"
+    puts "LEVEL1_BARS_PER_TURN = #{LEVEL1_BARS_PER_TURN}"
+    puts
 
     # Compute level 1 spiral
     #
@@ -261,7 +261,7 @@ class EspiralV3 < EspiralInstrumentation3
         @turns = 0
 
         every_turn = @sequencer.every LEVEL1_BARS_PER_TURN do
-          @logger.info "turn #{@turns}"
+          info "turn #{@turns}"
           @turns += 1
         end
 
@@ -274,7 +274,7 @@ class EspiralV3 < EspiralInstrumentation3
         end
 
         level1_play.after do
-          @logger.info "stopping level 1"
+          info "stopping level 1"
           every_turn.stop
         end
 
@@ -311,7 +311,7 @@ class EspiralV3 < EspiralInstrumentation3
         level2_plays.each.with_index do |level2_play, i|
           level2_play.after do
             @level2_active[i] = false
-            @logger.info "finished level 2 curve #{i} (remaining #{@level2_active.select {|_|_}.count} actives on level 2)"
+            info "finished level 2 curve #{i} (remaining #{@level2_active.select {|_|_}.count} actives on level 2)"
           end
         end
 
@@ -322,6 +322,7 @@ class EspiralV3 < EspiralInstrumentation3
 
         level3_plays_array = @level3_matrix_quantized_timed_series_array.collect.with_index do |level3_matrix_quantized_timed_series, level2_i|
           level3_matrix_quantized_timed_series.collect.with_index do |level3_matrix_quantized_time_serie, i|
+
             @sequencer.play_timed level3_matrix_quantized_time_serie do |values, duration:|
 
               @level3_x[level2_i] ||= []
@@ -341,7 +342,7 @@ class EspiralV3 < EspiralInstrumentation3
 
               @probe.render_point("second level line #{level2_i} third level #{i}", [@level3_x[level2_i][i], @level3_y[level2_i][i], @level3_z[level2_i][i]], color: 0xffa0a0)
 
-
+              render_to_midi level2: level2_i, level3: i, values: values, duration: duration
             end
           end
         end
@@ -350,14 +351,16 @@ class EspiralV3 < EspiralInstrumentation3
           level3_plays_array[level2_i].each.with_index do |level3_play, i|
             level3_play.after do
               @level3_active[level2_i][i] = false
-              @logger.info "finished level 3 #{level2_i}-#{i} (remaining #{@level3_active.flatten.select {|_|_}.count} actives on level 3)"
+              info "finished level 3 #{level2_i}-#{i} (remaining #{@level3_active.flatten.select {|_|_}.count} actives on level 3)"
             end
           end
         end
       end
     end
   end
-end
 
-EspiralV3.new.run(only_draw_matrixes: true)
+  protected def render_to_midi(level2:, level3:, values:, duration:)
+    info "rendering level 3 #{level2}-#{level3} values #{values} duration #{duration}"
+  end
+end
 

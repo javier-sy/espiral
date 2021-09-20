@@ -5,7 +5,7 @@ require_relative 'probe-3d'
 
 using Musa::Extension::InspectNice
 
-class EspiralBase3
+class CompositionBase
   include Musa::MIDIVoices
   include Musa::Clock
   include Musa::Sequencer
