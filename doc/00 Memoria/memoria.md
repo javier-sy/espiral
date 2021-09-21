@@ -734,4 +734,46 @@ Estoy haciendo que las espirales de nivel 3 tengan como eje los segmentos de niv
 Sigo con ello.
 Ya renderiza hasta el nivel 3 con las cuantizaciones por defecto.
 
+# Lunes, 20 septiembre 2021.
 
+He comenzado a renderizar a MIDI (wip).
+No tengo claro que el level 3 dé lugar a pliegos que generen armonías.
+Las espirales en nivel 3 son muy dirigidas sobre el eje Z porque se basan en las curvas de nivel 2 que se segmentan sobre los pliegues sobre Z.
+
+# Martes, 21 septiembre 2021.
+
+He conseguido que comience a sonar con este método de renderización MIDI:
+
+```ruby
+protected def render_to_midi(level2:, level3:, values:, duration:)
+super
+
+    if values[0]
+      # interpretamos los valores como [pitch/velocity, velocity/pitch, time]
+      quantized_duration =
+        duration.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
+
+      note = { grade: (84 + values[0]).to_i,
+               duration: quantized_duration[0],
+               velocity: (@level3_z[level2][level3] / 6r).to_i - 3,
+               voice: "#{level2}-#{level3}" }.extend(GDV)
+
+      instrument = @pool.find_free
+
+      technique = instrument.find_techniques(:legato).first
+      technique ||= instrument.find_techniques(:long).first
+      technique ||= instrument.find_techniques(:short).first
+
+      raise "Cannot find a technique for #{instrument.name}!!!!" unless technique
+
+      note[technique.id] = true
+
+      instrument.note **note.to_pdv(@chromatic_scale).tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
+    end
+end
+```
+
+Suena lento y pone notas en el límite inferior del rango del instrumento porque se salen del mismo pero es interesante.
+
+Voy a comenzar a añadir transformaciones de las dimensiones de las espirales a parámetros musicales.
+Quizás haya que cambiar 

@@ -27,9 +27,9 @@ class CompositionBase
   end
 
   private def create_sequencer(real_clock)
-    sequencer = Sequencer.new 4, 4, keep_proc_context: true
+    sequencer = Sequencer.new 4, 24, keep_proc_context: true, do_error_log: true
     clock = if real_clock
-              TimerClock.new ticks_per_beat: 4, bpm: 90
+              TimerClock.new ticks_per_beat: 24, bpm: 90
             else
               DummyClock.new { !sequencer.empty? }
             end
@@ -66,10 +66,10 @@ class CompositionBase
     Thread.new do
       block.call
 
-      # Thread.new { @clock.run { @sequencer.tick } }
-      @clock.run { @sequencer.tick }
+      Thread.new { @clock.run { @sequencer.tick } }
 
       sleep 0.1
+
       begin
         @clock.start
       rescue NoMethodError => e
