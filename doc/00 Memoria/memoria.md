@@ -789,9 +789,13 @@ Arreglados los problemas de nils perdidos. Era porque la rotación de las espira
 hacía que el nivel 3 comenzara antes que el nivel 2. La solución es usar los datos del nivel 2 anterior.
 
 Hay algunos fragmentos que suenan interesantes, sobre todo cuando hay más densidad 
-de curvas. (commit)
+de curvas. ([tag v1](https://github.com/javier-sy/2020-10-05-Espiral/tree/v1))
 
 Continúo complejizando la selección instrumental, eligiendo alternativamente entre
 instrumentos de cuerdas, viento madera y viento metal, por un lado, y percusivos tonales por otro.
 Además empiezo a renderizar el nivel 2 sólo con el clave.
+En esta versión hay varios momentos en que se producen errores porque no encuentra timbres que resuelvan los requisitos (a investigar).
+Pero es interesante incluso el silencio que produce. Es un buen mecanismo... faltan instrumentos para cubrir el timbre esperado? Pues silencio.
+
+
 

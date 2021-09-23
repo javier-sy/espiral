@@ -119,7 +119,6 @@ class CompositionWithInstrumentation < CompositionBase
       @trumpet,
       @cor_anglais,
       @bassoon,
-      @harpsichord,
       @trombone,
       @tuba,
       @clarinet]

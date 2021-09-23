@@ -320,7 +320,7 @@ class CompositionWithSpirals < CompositionWithInstrumentation
             @level2_y[i] = values[1] if values[1]
             @level2_z[i] = @sequencer.position - 1r
 
-            # render_to_midi_level2 level2: i, values: values, duration: duration
+            render_to_midi_level2 level2: i, values: values, duration: duration
 
             @probe.render_point("second level line #{i}", [@level2_x[i], @level2_y[i], @level2_z[i]], color: 0x00a0a0) if draw_level2
           end

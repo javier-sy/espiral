@@ -19,7 +19,7 @@ class CompositionWithNotesPlaying < CompositionWithSpirals
       note = { grade: (60 + values[0]).to_i,
                duration: quantized_duration[0],
                velocity: 0, # TODO change!!!! remember it's -5 to +5 range aprox (being a GDV)
-               voice: "#{level2}-#{level3}" }.extend(GDV)
+               voice: "#{level2}" }.extend(GDV)
 
       pitch = note.to_pdv(@chromatic_scale)
       instrument = @harpsichord
@@ -61,8 +61,7 @@ class CompositionWithNotesPlaying < CompositionWithSpirals
         warn "Calculating timbre: @level2_x[#{level2}] has not started yet, using @level2_x[#{level2 - 1}]"
       end
 
-      # instrument = @instrument_sets[level2 % @instrument_sets.size].find_free_with(timbre: timbre, pitch: pitch[:pitch])
-      instrument = @harmonic_instruments.find_free_with(timbre: timbre, pitch: pitch[:pitch])
+      instrument = @instrument_sets[level2 % @instrument_sets.size].find_free_with(timbre: timbre, pitch: pitch[:pitch])
 
       debug "Searching instrument for center #{timbre}... found #{instrument&.name || 'NOT FOUND!!!'}"
       error "Not found instrument for timbre #{timbre}" unless instrument
@@ -94,6 +93,6 @@ class CompositionWithNotesPlaying < CompositionWithSpirals
 
 end
 
-CompositionWithNotesPlaying.new(real_clock: false, draw_level1: false, draw_level2: true, draw_level3: false)
+CompositionWithNotesPlaying.new(real_clock: true, draw_level1: false, draw_level2: true, draw_level3: false)
                            .run(only_draw_matrixes: false, draw_level1: false, draw_level2: false, draw_level3: true)
 

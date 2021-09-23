@@ -29,6 +29,10 @@ class InstrumentsPool
                @instruments[position]&.pitch_range&.include?(pitch)) ||
       min_position.negative? && max_position > @instruments.size
 
-    @instruments[position] if @instruments[position]&.free_voices.positive?
+    if @instruments[position]&.free_voices.nil?
+      error "@instruments[#{position}]&.free_voices.nil?"
+    end
+
+    @instruments[position] if @instruments[position]&.free_voices&.positive?
   end
 end
