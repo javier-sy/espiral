@@ -41,7 +41,7 @@ class CompositionBase
     sequencer.logger.error!
 
     logger = sequencer.logger.clone
-    logger.info!
+    logger.debug!
 
     logger
   end

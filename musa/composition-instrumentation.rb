@@ -17,14 +17,14 @@ class CompositionWithInstrumentation < CompositionBase
     create_instruments
 
     # Separate instruments regarding mostly harmonic content vs less-harmonic content
+    # Making a pool of each category
     #
-    @harmonic_timbres, @less_harmonic_timbres = select_harmonic_timbres
+    harmonic_timbres, percussive_timbres = select_harmonic_timbres
 
-    @all_timbres = @harmonic_timbres + @less_harmonic_timbres
+    @harmonic_instruments = InstrumentsPool.new(*harmonic_timbres)
+    @percussive_instruments = InstrumentsPool.new(*percussive_timbres)
 
-    # Instruments pool
-    #
-    @pool = InstrumentsPool.new(*@all_timbres)
+    @all_instruments = InstrumentsPool.new(*(harmonic_timbres + percussive_timbres))
   end
 
   private def create_instruments
@@ -126,9 +126,11 @@ class CompositionWithInstrumentation < CompositionBase
 
     # Timbre scale for non-harmonic instruments (without order)
     #
-    less_harmonic_timbres = [@marimba, @vibraphone, @tubular_bells, @glockenspiel]
+    percussive_timbres = [@marimba, @vibraphone, @tubular_bells, @glockenspiel]
 
-    [harmonic_timbres, less_harmonic_timbres]
+    # Harpshichord is used only on level2, so it's excluded here
+
+    [harmonic_timbres, percussive_timbres]
   end
 
 end

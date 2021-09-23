@@ -777,3 +777,21 @@ Suena lento y pone notas en el límite inferior del rango del instrumento porque
 
 Voy a comenzar a añadir transformaciones de las dimensiones de las espirales a parámetros musicales.
 Quizás haya que cambiar 
+
+# Miércoles, 22 septiembre 2021.
+
+Depurando las transformación a sonido. Entre otras cosas ajustando el mapeo a instrumentos basado en level2_x y en el pitch.
+Arreglando problemillas de nils perdidos.
+
+# Jueves, 23 septiembre 2021.
+
+Arreglados los problemas de nils perdidos. Era porque la rotación de las espirales hacia atrás
+hacía que el nivel 3 comenzara antes que el nivel 2. La solución es usar los datos del nivel 2 anterior.
+
+Hay algunos fragmentos que suenan interesantes, sobre todo cuando hay más densidad 
+de curvas. (commit)
+
+Continúo complejizando la selección instrumental, eligiendo alternativamente entre
+instrumentos de cuerdas, viento madera y viento metal, por un lado, y percusivos tonales por otro.
+Además empiezo a renderizar el nivel 2 sólo con el clave.
+
