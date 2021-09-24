@@ -796,6 +796,8 @@ instrumentos de cuerdas, viento madera y viento metal, por un lado, y percusivos
 Además empiezo a renderizar el nivel 2 sólo con el clave.
 En esta versión hay varios momentos en que se producen errores porque no encuentra timbres que resuelvan los requisitos (a investigar).
 Pero es interesante incluso el silencio que produce. Es un buen mecanismo... faltan instrumentos para cubrir el timbre esperado? Pues silencio.
+([tag v2](https://github.com/javier-sy/2020-10-05-Espiral/tree/v2))
 
+# Viernes, 24 septiembre 2021.
 
-
+Arreglando pequeños errores de nils y revisando algoritmo de búsqueda de instrumentos que fallaba.

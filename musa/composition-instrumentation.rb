@@ -21,10 +21,10 @@ class CompositionWithInstrumentation < CompositionBase
     #
     harmonic_timbres, percussive_timbres = select_harmonic_timbres
 
-    @harmonic_instruments = InstrumentsPool.new(*harmonic_timbres)
-    @percussive_instruments = InstrumentsPool.new(*percussive_timbres)
+    @harmonic_instruments = InstrumentsPool.new('harmonic', *harmonic_timbres)
+    @percussive_instruments = InstrumentsPool.new('percussive', *percussive_timbres)
 
-    @all_instruments = InstrumentsPool.new(*(harmonic_timbres + percussive_timbres))
+    @all_instruments = InstrumentsPool.new('all', *(harmonic_timbres + percussive_timbres))
   end
 
   private def create_instruments

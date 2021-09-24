@@ -1,7 +1,8 @@
 require_relative 'instrument'
 
 class InstrumentsPool
-  def initialize(*instruments)
+  def initialize(name, *instruments)
+    @name = name
     @instruments = instruments
   end
 
@@ -11,28 +12,50 @@ class InstrumentsPool
     end
   end
 
+  private def search_path_index(center, size)
+    position = center.round
+    sign = position < center ? -1 : 1
+
+    counter = previous_counter = 0
+    switch = true
+    last_switch_done = false
+
+
+    size.times.collect do
+      (position + sign * counter).tap do |i|
+        case i
+        when 0
+          sign = 1
+          switch = false
+        when size - 1
+          sign = -1
+          switch = false
+        end
+
+        sign *= -1 if switch
+
+        _previous_counter = counter
+        counter += 1 if !switch && last_switch_done || counter == previous_counter
+        last_switch_done = !switch
+        previous_counter = _previous_counter
+      end
+    end
+  end
+
   def find_free_with(timbre:, pitch: nil)
 
-    center_position = (@instruments.size * timbre).round
+    start_position = (@instruments.size - 1) * timbre
 
-    i = -1
-    min_position = @instruments.size - 1
-    max_position = 0
+    path = search_path_index(start_position, @instruments.size)
 
-    begin
-      i += 1
-      position = center_position + (i / 2) * ((i % 2).zero? ? 1 : -1)
-      min_position = position if position < min_position
-      max_position = position if position > max_position
-
-    end until (@instruments[position]&.free_voices&.positive? &&
-               @instruments[position]&.pitch_range&.include?(pitch)) ||
-      min_position.negative? && max_position > @instruments.size
-
-    if @instruments[position]&.free_voices.nil?
-      error "@instruments[#{position}]&.free_voices.nil?"
+    found_index = path.find do |i|
+      @instruments[i].free_voices.positive? && @instruments[i].pitch_range.include?(pitch)
     end
 
-    @instruments[position] if @instruments[position]&.free_voices&.positive?
+    @instruments[found_index] if found_index
+  end
+
+  def to_s
+    "Instrument pool #{@name}: #{@instruments.size} instruments, #{@instruments.collect(&:free_voices).sum} free voices"
   end
 end

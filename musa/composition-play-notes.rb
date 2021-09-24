@@ -5,7 +5,7 @@ class CompositionWithNotesPlaying < CompositionWithSpirals
     super
     @chromatic_scale = Scales.default_system.default_tuning.chromatic[0]
 
-    @instrument_sets = [@harmonic_instruments, @percussive_instruments, @percussive_instruments]
+    @instruments_pools = [@harmonic_instruments, @percussive_instruments, @percussive_instruments]
   end
 
   protected def render_to_midi_level2(level2:, values:, duration:)
@@ -61,22 +61,24 @@ class CompositionWithNotesPlaying < CompositionWithSpirals
         warn "Calculating timbre: @level2_x[#{level2}] has not started yet, using @level2_x[#{level2 - 1}]"
       end
 
-      instrument = @instrument_sets[level2 % @instrument_sets.size].find_free_with(timbre: timbre, pitch: pitch[:pitch])
+      instruments_pool = @instruments_pools[level2 % @instruments_pools.size]
+      instrument = instruments_pool.find_free_with(timbre: timbre, pitch: pitch[:pitch])
 
-      debug "Searching instrument for center #{timbre}... found #{instrument&.name || 'NOT FOUND!!!'}"
-      error "Not found instrument for timbre #{timbre}" unless instrument
+      debug "Searching instrument for center #{timbre} and pitch #{pitch[:pitch]} in #{instruments_pool.name}... found #{instrument&.name || 'NOT FOUND!!!'}"
 
-      # instrument = @pool.find_free
+      if instrument
+        technique = instrument.find_techniques(:legato).first
+        technique ||= instrument.find_techniques(:long).first
+        technique ||= instrument.find_techniques(:short).first
 
-      technique = instrument.find_techniques(:legato).first
-      technique ||= instrument.find_techniques(:long).first
-      technique ||= instrument.find_techniques(:short).first
+        raise "Cannot find a technique for #{instrument.name}!!!!" unless technique
 
-      raise "Cannot find a technique for #{instrument.name}!!!!" unless technique
+        note[technique.id] = true
 
-      note[technique.id] = true
-
-      instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
+        instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
+      else
+        warn "Not found instrument for timbre #{timbre} and pitch #{pitch[:pitch]} in instrument set #{instruments_pool}"
+      end
     end
   end
 
@@ -90,9 +92,8 @@ class CompositionWithNotesPlaying < CompositionWithSpirals
 
     new_pitch
   end
-
 end
 
-CompositionWithNotesPlaying.new(real_clock: true, draw_level1: false, draw_level2: true, draw_level3: false)
-                           .run(only_draw_matrixes: false, draw_level1: false, draw_level2: false, draw_level3: true)
+CompositionWithNotesPlaying.new(real_clock: true, draw_level1: false, draw_level2: false, draw_level3: false)
+                           .run(only_draw_matrixes: false, draw_level1: false, draw_level2: true, draw_level3: true)
 
