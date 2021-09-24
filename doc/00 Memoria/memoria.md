@@ -1,7 +1,5 @@
 # Sábado, 14 noviembre 2020
 
-
-
 - Hacer una doble cuantización genera glitches interesantes
 
 ```
@@ -464,3 +462,343 @@ Implementando y debugando "Composer".
 Haciendo los últimos casos de test para Composer. Faltará desasignar rutas.
 
 Ahora toca comenzar a implementar la orquestación en Live y a programar los drivers de los parámetros.
+
+Preparando el proyecto nuevo en Live, guardando versiones de lo hecho hasta ahora, etc.
+
+# Martes, 29 junio 2021
+
+Preparando los drivers para instrumentos.
+
+# Miércoles, 30 junio 2021
+
+Preparando los drivers para los instrumentos. Surge la problemática de que la librería BBC SO Pro
+tiene un único nivel jerárquico para identificar las articulaciones (el nº de keyswitch) mientras
+que lógicamente hay una jerarquía: 1r nivel legato/long/short, 2º nivel con sordina/flautando/... 3r nivel (trill) 2M/2m
+
+# Jueves, 1 julio 2021
+
+Preparando los drivers para instrumentos.
+
+# Viernes, 2 julio 2021
+
+Preparando los drivers para instrumentos.
+Siguiente: Seguir con vientos.
+
+# Lunes, 5 julio 2021
+
+He completado viento madera y viento metal. He comenzado percusión afinada.
+Siguiente: seguir con percusión afinada.
+
+# Martes, 6 julio 2021
+
+He completado los drivers de percusión afinada.
+He implementado todos los instrumentos de la orquesta en VEP y en Live y he conectado los nuevos puertos MIDI a Live.
+He comenzado a crear los midi_voices en espiral2.rb
+
+# Miércoles, 7 julio 2021
+
+Completados midi_voices y escala de instrumentos. Corregidos pequeños bugs.
+
+Conseguido generar una secuencia de una nota por cada instrumento.
+Se encalla el note-off de glockenspiel y tubular bells... Por qué??
+
+# Jueves, 8 julio 2021
+
+El note-off que se encallaba era porque en la última nota paraba el clock y no se llegaban a emitir los últimos note-off.
+
+He estado trasladando una primera prueba de la espiral a multinstrumento.
+
+# Viernes, 9 julio 2021
+
+Estoy intentando entender cómo introducir el mecanismo para generar diferentes transformaciones mediante Composer.
+
+Hay varios problemas:
+- La matriz no es unitaria (todas las dimensiones deberían ser valores entre 0 y 1) sino que tiene valores para x, y, z con una escala más próxima a alturas y tiempo. Esto impide que los valores transformados puedan tener una escala arbitraria.  
+- En las transformaciones básicas de Matrix a TIMED_UNION cuantizadas se separa en varias partes el proceso: primero m.to_p, que extrae la dimensión temporal (y ya no se puede transformar, o sí?); luego la timed_union (que se ejecuta con play) tiene el tiempo sin transformar porque se excluye con tap { delete_at(2) }
+
+Vamos, es un lío (resoluble).
+
+Parece que la cuestión es que en...
+
+```
+matrix_p_array = m.to_p(time_dimension: 2, keep_time: true)
+
+midi_quantized_timed_series =
+  matrix_p_array.collect do |line|
+    TIMED_UNION(
+      *line.to_timed_serie(time_start_component: 2, base_duration: 1)
+           .flatten_timed
+           .split
+           .to_a
+           .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
+           .collect { |_|
+             _.quantize(predictive: true, stops: false)
+              .anticipate { |_, c, n|
+                n ? c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] } :
+                  c } }
+    )
+  end
+```
+
+... hay que pasar por Composer desde .split (incluido).
+
+Esto implica que Composer debe permitir no sólo operaciones de series sino operaciones de arrays (sólo en medio del pipeline, de modo que el pipeline comienze y acabe con una serie).
+
+# Lunes, 12 julio 2021
+
+Implementando operaciones no-series en los pipelines de Composer.
+
+# Martes, 13 julio 2021
+
+Detectado un fallo en los buffers.
+
+# Jueves, 15 julio 2021
+
+Sigo con el fallo en los buffers. Es un problema de .split al instanciar las series spliteadas. (se clonan los proxis cuando deberían tener el mismo proxy)
+
+# Viernes, 16 julio 2021
+
+Idem.
+
+# Lunes, 19 julio 2021
+
+Sigo con Composer.
+
+# Martes, 20 julio 2021
+
+Sigo con Composer, para añadir posibilidad de ejecución lazy que permita combinar non-series operations y inputs asignadas a posteriori.
+
+# Miercoles, 21 julio 2021
+
+Idem.
+
+# Jueves, 22 julio 2021
+
+Al final estoy rehaciendo el Composer para que utilice encadenamiento de Proc's con la finalidad
+de hacer que todo el enlazamiento sea 'lazy'. Con eso evito que se ejecuten las pipelines antes de 
+tener inputs asignados, lo cual, si hay non-series operations, rompe el paso de los datos a través de la pipeline.
+
+# Viernes, 23 julio 2021
+
+Sigo con Composer.
+
+# Lunes, 26 julio 2021
+
+Sigo con Composer.
+
+# Martes, 27 julio 2021
+
+Sigo con Composer.
+
+# Miércoles, 28 julio 2021
+
+Terminado Composer. En principio ya funciona bien. Genero versión 0.23.5.
+Problemas con RubyMine al debugar espiral2.rb. Solucionados descargando el repo de nuevo...
+
+# Jueves, 29 julio 2021.
+
+Ajustes en Composer.
+
+# Viernes, 30 julio 2021.
+
+# Sábado, 31 julio 2021.
+
+# Lunes, 2 agosto 2021.
+
+Estos últimos días he estado haciendo que las series tengan un estado "undefined" 
+que corresponde a que aún no tienen su source/sources asignadas y no pueden decidir si 
+son prototype o instance.
+
+# Martes, 3 agosto 2021.
+
+Completadas las pruebas del estado "undefined" en las series y completado el composer teniendo en cuenta el nuevo estado y 
+su lógica. Subido a versión 0.23.9.
+
+# Miércoles, 4 agosto 2021.
+
+Estoy peleándome sobre cómo organizar la generación de la pieza.
+Hay problemas...
+- porque hay muchos parámetros que controlar (en cada parte de la pieza son diferentes),
+- porque cada parámetro implica una forma de generación diferente, 
+- porque quiero varios niveles organizativos
+estructurados por las espirales de los niveles superiores (con 3 niveles es suficiente, pero me atrae la idea 
+de una jerárquía con diferentes niveles de profundidad). 
+
+Esto me lleva a olvidar por el momento todo lo construído hasta ahora, pensar en el problema y luego volver a las herramientas 
+construídas. Espero que no me lleve a tener que crear más herramientas.
+
+También me doy cuenta que en cuanto haya repliegues de las espirales se multiplican las líneas (voces en el último nivel jerárquico) y 
+probablemente acabarán faltando instrumentos. Tendré que aplicar algún criterio y mecanismo de selección. Habrá un % de notas perdidas cuya 
+medición me ayudará a valorar el funcionamiento de las opciones que vaya eligiendo.
+
+# Jueves, 5 agosto 2021.
+
+He comenzado a plantear la solución a través de varios niveles de play, every, etc. en el sequencer.
+He comenzado a montar el render de la espiral basada en aumento hasta phi y reducción hasta el final.
+
+
+# Viernes, 6 agosto 2021.
+
+He implementado el nivel 0 y funciona bien. Habían surgido algunos problemas porque la espiral hacía 
+un retroceso temporal en el paso de la subida a la bajada pero no era de Musa sino de la función 
+generadora de espiral, que generaba un punto más de los necesarios al final.
+
+Al estar tan centrado en la perspectiva de intentar hacerlo todo desde una única p_serie no estaba
+viendo los recursos que ya tengo para implementar múltiples niveles. Ayer vi que tenía que simplificar.
+
+# Lunes, 30 agosto 2021.
+
+Volvemos a la espiral. A ver si la termino ya...
+He refactorizado el código de espiral3 para comenzar a tenerlo más estructurado.
+Ha surgido un error rarísimo de que dentro del método _next_value de TimedUnionOfArrayOfTimedSeries no se ve el método Ha surgido un error rarísimo de que dentro del método _next_value de TimedUnionOfArrayOfTimedSeries no se ve el método infer_components de la misma clase
+  
+# Martes, 31 agosto 2021.
+
+Sigo con el error rarísimo. Alucinante. Parece un error relacionado con el private def _next_value, que NO ocurre en el contexto de las pruebas rspec.
+
+# Miércoles, 1 septiembre 2021.
+
+El error era porque en TimedUnionOfArrayOfTimedSeries el método infer_components estaba FUERA de la clase.
+Lo raro es que funcionara en otras ocasiones, lo cual era debido al uso generalizado de includes en la raíz de las pruebas rspec,
+que hacía que no se hubiera detectado.
+
+Estoy quitando todos los include en la raíz de las pruebas rspec, lo cual lleva a añadir el módulo en todos los usos de clases porque
+los "include" sólo importan clases cuando se está en el contexto de una clase.
+Podría funcionar extend? Comprobado que no.
+
+# Jueves, 2 septiembre 2021.
+
+He seguido quitando los include en los tests (y en el código principal de musa-dsl). También he reformateado y refactorizado algo de código.
+
+# Viernes, 3 septiembre 2021.
+
+Ya funciona de nuevo lo que funcionaba antes del refactor. También he resuelto un pequeño problema con musa::extension::with.
+Ahora ya toca volver a Espiral.
+El nivel 2 creo que sí que va a permitir dobleces temporales (aunque tendrán que ser pocas) para hacer más interesante la generación.
+
+# Lunes, 6 septiembre 2021.
+
+Preparando los niveles de forma agregada: el nivel 3 define el tamaño de los ciclos del nivel 2 y éste del nivel 1.
+Ha surgido un problema menor con la función Serie.map que me ha llevado a tener que cambiar algunas cosas en MusaDSL.
+
+# Martes, 7 septiembre 2021.
+
+Corrigiendo en musa los problemas derivados del cambio en Serie.map. Generada versión 0.23.15.
+
+# Miércoles, 8 septiembre 2021.
+
+He conseguido visualizar las matrices de nivel 1 nivel 2. En las de nivel 2
+se pueden aplicar transformaciones y las encadena correctamente. Lo que pasa es que las transformacione aplicadas
+cambian la posición del eje temporal original y no respeta la duración necesaria, con lo que no se coinciden con las duraciones esperadas.
+
+Para resolver esto creo que hay que aplicar una normalización de la espiral, de modo que [0,0,0] quede en el centro geométrico de la espiral y que el "cubo" que la contiene tenga lados unitarios,
+luego aplicar la transformación, que creo que mantendrá el cubo unitario, y finalmente extender la transformación para que ocupe el tiempo y dimensiones necesarias.
+
+También se podría extender la espiral no en base al cubo unitario sino en base a los puntos de inicio y finalización de la espiral,
+lo cual podría hacer que otros puntos de la espiral cayeran fuera del cubo y ocuparan tiempos fuera de los asignados.
+
+# Jueves, 9 septiembre 2021.
+
+He implementado que la espiral sea unitaria, luego se rote, y luego se estire en z para que ocupe todo el tiempo que le toca y
+que se escale en x, y para que tenga la altura y anchura que le toca según el radio correspondiente.
+
+La idea es que las espirales de nivel 2 roten haciendo que el vector z roten hacia un vector v que se corresponda con un
+punto de otra espiral que va desarrollándose en el tiempo. Así las espirales de nivel 2 son como unas "peonzas" que se están desestabilizando y caen.
+
+Esto ha requerido investigar un poco de geometría y trigonometría.
+
+https://www.euclideanspace.com/maths/algebra/vectors/angleBetween/
+
+# Viernes, 10 septiembre 2021.
+
+He construido la espiral de nivel 2 con rotaciones orientadas según un vector también representado por otra espiral.
+He tenido que ir ajustando para que no haya un exceso de voces ni vueltas al pasado antes de que empiece la pieza!
+También he ajustado para tomar en cuenta phi como centro de interés donde pasan más cosas.
+
+# Lunes, 13 septiembre 2021.
+
+El nivel 2 ya está cuantizado correctamente. Tiene 23 curvas. La densidad máxima de curvas simultáneas es de 7.
+Ahora toca hacer las espirales de nivel 3: una espiral por curva, con varias vueltas (proporcional a la zona en que se encuentra) 
+y con giro con vector perpendicular al plano de la espiral de nivel 2?
+
+# Martes, 14 septiembre 2021.
+
+He programado parte del nivel 3, que se basa en las curvas generadas desde el nivel 2. Las espirales de nivel 3 siguen a las curvas del nivel 2.
+
+# Miércoles, 15 septiembre 2021.
+
+Estoy haciendo que las espirales de nivel 3 tengan como eje los segmentos de nivel 2. Hay varias cosillas a tener en cuenta que afectan.
+
+# Jueves, 16 septiembre 2021.
+
+Sigo con ello.
+Ya renderiza hasta el nivel 3 con las cuantizaciones por defecto.
+
+# Lunes, 20 septiembre 2021.
+
+He comenzado a renderizar a MIDI (wip).
+No tengo claro que el level 3 dé lugar a pliegos que generen armonías.
+Las espirales en nivel 3 son muy dirigidas sobre el eje Z porque se basan en las curvas de nivel 2 que se segmentan sobre los pliegues sobre Z.
+
+# Martes, 21 septiembre 2021.
+
+He conseguido que comience a sonar con este método de renderización MIDI:
+
+```ruby
+protected def render_to_midi(level2:, level3:, values:, duration:)
+super
+
+    if values[0]
+      # interpretamos los valores como [pitch/velocity, velocity/pitch, time]
+      quantized_duration =
+        duration.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
+
+      note = { grade: (84 + values[0]).to_i,
+               duration: quantized_duration[0],
+               velocity: (@level3_z[level2][level3] / 6r).to_i - 3,
+               voice: "#{level2}-#{level3}" }.extend(GDV)
+
+      instrument = @pool.find_free
+
+      technique = instrument.find_techniques(:legato).first
+      technique ||= instrument.find_techniques(:long).first
+      technique ||= instrument.find_techniques(:short).first
+
+      raise "Cannot find a technique for #{instrument.name}!!!!" unless technique
+
+      note[technique.id] = true
+
+      instrument.note **note.to_pdv(@chromatic_scale).tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
+    end
+end
+```
+
+Suena lento y pone notas en el límite inferior del rango del instrumento porque se salen del mismo pero es interesante.
+
+Voy a comenzar a añadir transformaciones de las dimensiones de las espirales a parámetros musicales.
+Quizás haya que cambiar 
+
+# Miércoles, 22 septiembre 2021.
+
+Depurando las transformación a sonido. Entre otras cosas ajustando el mapeo a instrumentos basado en level2_x y en el pitch.
+Arreglando problemillas de nils perdidos.
+
+# Jueves, 23 septiembre 2021.
+
+Arreglados los problemas de nils perdidos. Era porque la rotación de las espirales hacia atrás
+hacía que el nivel 3 comenzara antes que el nivel 2. La solución es usar los datos del nivel 2 anterior.
+
+Hay algunos fragmentos que suenan interesantes, sobre todo cuando hay más densidad 
+de curvas. ([tag v1](https://github.com/javier-sy/2020-10-05-Espiral/tree/v1))
+
+Continúo complejizando la selección instrumental, eligiendo alternativamente entre
+instrumentos de cuerdas, viento madera y viento metal, por un lado, y percusivos tonales por otro.
+Además empiezo a renderizar el nivel 2 sólo con el clave.
+En esta versión hay varios momentos en que se producen errores porque no encuentra timbres que resuelvan los requisitos (a investigar).
+Pero es interesante incluso el silencio que produce. Es un buen mecanismo... faltan instrumentos para cubrir el timbre esperado? Pues silencio.
+([tag v2](https://github.com/javier-sy/2020-10-05-Espiral/tree/v2))
+
+# Viernes, 24 septiembre 2021.
+
+Arreglando pequeños errores de nils y revisando algoritmo de búsqueda de instrumentos que fallaba.
+([tag v3](https://github.com/javier-sy/2020-10-05-Espiral/tree/v3))

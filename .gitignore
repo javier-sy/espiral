@@ -5,6 +5,7 @@
 .bundle
 .rspec
 .idea
+*.iml
 Gemfile.lock
 bin
 Backup

@@ -1,4 +1,6 @@
 require 'matrix'
+require 'mittsu'
+
 require 'musa-dsl'
 
 class Probe3D
@@ -6,7 +8,7 @@ class Probe3D
 
   include Mittsu
 
-  def initialize(axis_length, logger:)
+  def initialize(axis_length, z_scale: 1.0, logger:)
     super()
 
     @logger = logger
@@ -14,13 +16,13 @@ class Probe3D
     @scroll_means_move = false
     @scroll_means_zoom = false
 
-    @renderer = OpenGLRenderer.new width: 1024, height: 768, title: 'Matrix Probe'
+    @renderer = OpenGLRenderer.new width: 1600, height: 1024, title: 'Matrix Probe'
     @scene = Scene.new
 
-    @camera = PerspectiveCamera.new(75.0, (1024/768r).to_f, 0.1, 1000.0)
+    @camera = PerspectiveCamera.new(75.0, (1600/1024r).to_f, 0.1, 1000.0)
     @camera.position.z = 10.0
 
-    axis_colors = [0xff0000, 0x00ff00, 0x0000ff]
+    axis_colors = [0xff0000, 0x0000ff, 0xf0f0f0]
     material = axis_colors.collect { |c| LineBasicMaterial.new(color: c) }
     complementary_axis = [1, 0, 0]
 
@@ -28,15 +30,18 @@ class Probe3D
 
     axis_mesh = Mesh.new
 
+    @scale = [1.0, 1.0, z_scale]
+    @scale_transformation = Matrix.column_vector(@scale)
+
     (0..2).each do |axis|
       geometry = Geometry.new
 
-      (0..axis_length-1).each do |position|
+      (0..axis_length - 1).each do |position|
         v0 = [0] * 3
-        v0[axis] = position
+        v0[axis] = position * @scale[axis]
 
         v1 = [0] * 3
-        v1[axis] = position + 1
+        v1[axis] = position * @scale[axis] + @scale[axis]
 
         v2 = v1.clone
         v2[complementary_axis[axis]] = -0.1
@@ -61,8 +66,10 @@ class Probe3D
       if @scroll_means_move
         @root.position.x += offset.x / 20.0
         @root.position.y -= offset.y / 20.0
+
       elsif @scroll_means_zoom
         @root.position.z += offset.y / 50.0
+
       else
         @root.rotation.x -= offset.y / 100.0
 
@@ -94,6 +101,7 @@ class Probe3D
     @renderer.window.run do
       begin
         @renderer.render(@scene, @camera)
+
       rescue NoMethodError => e
         @logger.error e
       end
@@ -108,7 +116,8 @@ class Probe3D
     geometry = Geometry.new
 
     matrix._rows.each do |row|
-      geometry.vertices << Vector3.new(*row)
+      to_render = [row[0] * @scale[0], row[1] * @scale[1], row[2] * @scale[2]]
+      geometry.vertices << Vector3.new(*to_render)
     end
 
     mesh.add Line.new(geometry, material)
@@ -127,8 +136,9 @@ class Probe3D
       new_line = @lines[line_name] = Line.new(nil, material)
     end
 
-    new_line.geometry.vertices << Vector3.new(*point)
-    # puts "render_point: point #{point}"
+    to_render = [point[0] * @scale[0], point[1] * @scale[1], point[2] * @scale[2]]
+    new_line.geometry.vertices << Vector3.new(*to_render)
+
     @root.add new_line
   end
 end
