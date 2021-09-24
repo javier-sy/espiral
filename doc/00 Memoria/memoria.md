@@ -801,3 +801,4 @@ Pero es interesante incluso el silencio que produce. Es un buen mecanismo... fal
 # Viernes, 24 septiembre 2021.
 
 Arreglando pequeños errores de nils y revisando algoritmo de búsqueda de instrumentos que fallaba.
+([tag v3](https://github.com/javier-sy/2020-10-05-Espiral/tree/v3))

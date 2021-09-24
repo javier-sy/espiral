@@ -7,7 +7,7 @@ class InstrumentsPool
   end
 
   attr_reader :name
-  
+
   def find_free
     @instruments.find do |instrument|
       instrument.free_voices.positive?
