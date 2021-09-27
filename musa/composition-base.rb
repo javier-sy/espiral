@@ -1,5 +1,6 @@
 require 'musa-dsl'
 require 'unimidi'
+require 'forwardable'
 
 require_relative 'probe-3d'
 
@@ -10,10 +11,10 @@ class CompositionBase
   include Musa::Clock
   include Musa::Sequencer
 
-  def initialize(real_clock: false, do_voices_log: true)
+  def initialize(realtime: false, do_voices_log: true)
     # Sequencer setup
     #
-    @sequencer, @clock = create_sequencer(real_clock)
+    @sequencer, @clock = create_sequencer(realtime)
 
     # Logging setup
     #
@@ -28,11 +29,12 @@ class CompositionBase
 
   private def create_sequencer(real_clock)
     sequencer = Sequencer.new 4, 24, keep_proc_context: true, do_error_log: true
-    clock = if real_clock
-              TimerClock.new ticks_per_beat: 24, bpm: 90
-            else
-              DummyClock.new { !sequencer.empty? }
-            end
+
+    clock = ClockProxy.new(if real_clock
+                             TimerClock.new ticks_per_beat: 24, bpm: 90
+                           else
+                             DummyClock.new { !sequencer.empty? }
+                           end)
 
     [sequencer, clock]
   end
@@ -41,17 +43,23 @@ class CompositionBase
     sequencer.logger.error!
 
     logger = sequencer.logger.clone
-    logger.debug!
+    logger.error!
 
     logger
   end
 
-  private def info(text)
+  private def info(text, force: false)
+    previous_level = @logger.level
+    @logger.level = Logger::INFO if force
     @logger.info(text)
+    @logger.level = previous_level if force
   end
 
-  private def debug(text)
-    @logger.debug(text)
+  private def debug(text, force: false)
+    previous_level = @logger.level
+    @logger.level = Logger::DEBUG if force
+    @logger.debug(text) if force
+    @logger.level = previous_level if force
   end
 
   private def warn(text)
@@ -70,20 +78,45 @@ class CompositionBase
 
       sleep 0.1
 
-      begin
-        @clock.start
-      rescue NoMethodError => e
-        puts "Ignoring #{e.message}"
-      end
+      @clock.start
     end
 
     @probe.run
 
-    begin
-      @clock.stop
-    rescue NoMethodError => e
-      puts "Ignoring #{e.message}"
-    end
+    @clock.stop
   end
 end
 
+class ClockProxy
+  extend Forwardable
+
+  def initialize(clock)
+    @clock = clock
+  end
+
+  def_delegator :@clock, :run
+
+  def start
+    @clock.start if @clock.respond_to?(:start)
+  end
+
+  def stop
+    @clock.stop if @clock.respond_to?(:stop)
+  end
+
+  def bpm=(value)
+    if @clock.respond_to?(:bpm=)
+      @clock.bpm = value
+    else
+      @bpm = value
+    end
+  end
+
+  def bpm
+    if @clock.respond_to?(:bpm)
+      @clock.bpm
+    else
+      @bpm
+    end
+  end
+end

@@ -74,7 +74,7 @@ class Instrument
       voice_info = "channel #{midi_voice.channel}"
       logger_method = :info
     else
-      voice_info = "losing notes: not enough voices (#{@midi_voices.size} available)!!!"
+      voice_info = "losing notes: not enough voices with note slots available (used #{@midi_voices.size} voices with #{@polyphony} notes of polyphony each)!!!"
       logger_method = :warn
     end
 

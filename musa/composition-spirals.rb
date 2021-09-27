@@ -30,8 +30,8 @@ class CompositionWithSpirals < CompositionWithInstrumentation
   LEVEL1_BARS_PER_TURN = LEVEL2_BARS_PER_SPIRAL_SERIE.to_a.sum / LEVEL1_ASKED_TURNS
   LEVEL1_TURNS = LEVEL2_BARS_PER_SPIRAL_SERIE.to_a.sum / LEVEL1_BARS_PER_TURN.to_f
 
-  def initialize(real_clock: false, do_voices_log: true, draw_level1: true, draw_level2: true, draw_level3: true)
-    super(real_clock: real_clock, do_voices_log: do_voices_log)
+  def initialize(realtime: false, do_voices_log: true, draw_level1: true, draw_level2: true, draw_level3: true)
+    super(realtime: realtime, do_voices_log: do_voices_log)
 
     info "SPIRALS CONFIGURATION"
     info "---------------------"
@@ -310,6 +310,9 @@ class CompositionWithSpirals < CompositionWithInstrumentation
             unless @level2_active[i]
               @level2_active[i] = true
               info "starting level 2 curve #{i} (#{@level2_active.select {|_|_}.count} actives on level 2)"
+
+              @clock.bpm = 80 + (90 * (@level1_y - @level1_box.y_min) / @level1_box.y_range).round
+              info "setting clock bpm to #{@clock.bpm.to_f}", force: true
             end
 
             if @level2_x[i].nil? && values[0].nil?

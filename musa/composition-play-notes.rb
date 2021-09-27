@@ -1,7 +1,7 @@
 require_relative 'composition-spirals'
 
 class CompositionWithNotesPlaying < CompositionWithSpirals
-  def initialize(real_clock: nil, do_voices_log: nil, draw_level1: true, draw_level2: true, draw_level3: true)
+  def initialize(realtime: nil, do_voices_log: nil, draw_level1: true, draw_level2: true, draw_level3: true)
     super
     @chromatic_scale = Scales.default_system.default_tuning.chromatic[0]
 
@@ -94,6 +94,6 @@ class CompositionWithNotesPlaying < CompositionWithSpirals
   end
 end
 
-CompositionWithNotesPlaying.new(real_clock: true, draw_level1: false, draw_level2: false, draw_level3: false)
+CompositionWithNotesPlaying.new(realtime: true, draw_level1: false, draw_level2: false, draw_level3: false)
                            .run(only_draw_matrixes: false, draw_level1: false, draw_level2: true, draw_level3: true)
 

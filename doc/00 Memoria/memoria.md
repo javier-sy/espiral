@@ -802,3 +802,14 @@ Pero es interesante incluso el silencio que produce. Es un buen mecanismo... fal
 
 Arreglando pequeños errores de nils y revisando algoritmo de búsqueda de instrumentos que fallaba.
 ([tag v3](https://github.com/javier-sy/2020-10-05-Espiral/tree/v3))
+
+Otra cosa que también se puede parametrizar es el tempo. Los diferentes niveles 2 pueden tener diferente tempo...
+
+# Lunes, 27 septiembre 2021.
+
+Y otra cosa que se puede parametrizar es la escala.
+También el nº de vueltas de las espirales de nivel 3.
+
+Voy a intentar parametrizar el tempo y a cambiar la orientación de las espirales.
+
+Con el tempo parametrizado: ([tag v4](https://github.com/javier-sy/2020-10-05-Espiral/tree/v4))
