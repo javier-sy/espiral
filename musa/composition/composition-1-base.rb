@@ -2,7 +2,7 @@ require 'musa-dsl'
 require 'unimidi'
 require 'forwardable'
 
-require_relative 'probe-3d'
+require_relative '../lib/probe-3d'
 
 using Musa::Extension::InspectNice
 

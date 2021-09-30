@@ -843,6 +843,9 @@ Lo he modificado para que genere una nota cuando cambia cualquiera de los dos va
 
 Esta versión suena interesante. ([tag v5](https://github.com/javier-sy/2020-10-05-Espiral/tree/v5))
 
-De todos modos aún falta trabajo.
-
 Siguiente cosa: aumentar el tamaño x-y del nivel 2 de modo que haya más variación de los registros al generar el nivel 3.
+
+He multiplicado la dimensión x-y del level 2 por 4. Es espectacular.
+
+"El sueño de la razón produce monstruos" (aguafuerte de Goya)
+Como subtítulo de Espiral: "El despertar de la razón produce monstruos"

@@ -1,12 +1,12 @@
-require_relative 'composition-base'
+require_relative 'composition-1-base'
 
-require_relative 'string-instruments-bbc'
-require_relative 'ww-instruments-bbc'
-require_relative 'brass-instruments-bbc'
-require_relative 'tuned-percussions-bbc'
-require_relative 'keyboard-instruments-pianoteq'
+require_relative '../orchestra/string-instruments-bbc'
+require_relative '../orchestra/ww-instruments-bbc'
+require_relative '../orchestra/brass-instruments-bbc'
+require_relative '../orchestra/tuned-percussions-bbc'
+require_relative '../orchestra/keyboard-instruments-pianoteq'
 
-require_relative 'instruments-pool'
+require_relative '../lib/instruments-pool'
 
 class CompositionWithInstrumentation < CompositionBase
   def initialize(realtime: false, render3d: nil, do_voices_log: true)

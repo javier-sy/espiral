@@ -1,4 +1,4 @@
-require_relative 'composition-spirals-runner'
+require_relative 'composition-5-spirals-runner'
 
 class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
   include Musa::Scales
@@ -98,9 +98,3 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
     new_pitch
   end
 end
-
-CompositionWithNotesPlaying.new(realtime: true, render3d: true,
-                                draw_level1: false, draw_level2: true, draw_level3: true)
-                           .run(play: true,
-                                draw_level1: false, draw_level2: true, draw_level3: true)
-

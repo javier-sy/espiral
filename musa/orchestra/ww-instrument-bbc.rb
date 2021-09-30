@@ -1,6 +1,6 @@
 require 'musa-dsl'
 
-require_relative 'instrument'
+require_relative '../lib/instrument'
 
 using Musa::Extension::InspectNice
 

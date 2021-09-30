@@ -1,7 +1,7 @@
-require_relative 'composition-instrumentation'
+require_relative 'composition-2-instrumentation'
 
-require_relative 'matrix-operations'
-require_relative 'matrix-custom-operations'
+require_relative '../lib/matrix-operations'
+require_relative '../lib/matrix-custom-operations'
 
 using Musa::Extension::Matrix
 
@@ -11,6 +11,7 @@ class CompositionWithSpirals < CompositionWithInstrumentation
 
   LEVEL2_SPIRALS = 13 # fibonacci serie 1 1 2 3 5 8 _13_ 21 34
   LEVEL2_SPIRALS_BEFORE_INFLECTION = 8
+  LEVEL2_TURN_RADIUS_DELTA = 4
 
   LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE =
     FIBO().max_size(LEVEL2_SPIRALS_BEFORE_INFLECTION) +
@@ -38,7 +39,8 @@ class CompositionWithSpirals < CompositionWithInstrumentation
     info ''
     info "LEVEL2_SPIRALS = #{LEVEL2_SPIRALS}"
     info "LEVEL2_SPIRALS_BEFORE_INFLECTION = #{LEVEL2_SPIRALS_BEFORE_INFLECTION}"
-    info "LEVEL2_BARS_PER_SPIRAL_SERIE        = #{LEVEL2_BARS_PER_SPIRAL_SERIE.to_a}"
+    info "LEVEL2_TURN_RADIUS_DELTA         = #{LEVEL2_TURN_RADIUS_DELTA}"
+    info "LEVEL2_BARS_PER_SPIRAL_SERIE     = #{LEVEL2_BARS_PER_SPIRAL_SERIE.to_a}"
     info ''
     info "LEVEL1_ASKED_TURNS = #{LEVEL1_ASKED_TURNS}"
     info "LEVEL1_TURNS = #{LEVEL1_TURNS}"
@@ -114,7 +116,7 @@ class CompositionWithSpirals < CompositionWithInstrumentation
 
     while spiral_length = spiral_lengths_serie.next_value
 
-      delta_radius = round < 8 ? 1 : -1
+      delta_radius = round < LEVEL2_SPIRALS_BEFORE_INFLECTION ? LEVEL2_TURN_RADIUS_DELTA : -LEVEL2_TURN_RADIUS_DELTA
 
       info "level 2 processing spiral #{round} of length #{spiral_length} with radius_start #{last_radius} radius_end #{last_radius + delta_radius}"
 

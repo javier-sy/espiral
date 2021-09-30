@@ -1,7 +1,4 @@
-require_relative 'composition-spirals'
-
-require_relative 'matrix-operations'
-require_relative 'matrix-custom-operations'
+require_relative 'composition-3-spirals'
 
 using Musa::Extension::Matrix
 
