@@ -9,7 +9,7 @@ require_relative 'keyboard-instruments-pianoteq'
 require_relative 'instruments-pool'
 
 class CompositionWithInstrumentation < CompositionBase
-  def initialize(realtime: false, do_voices_log: true)
+  def initialize(realtime: false, render3d: nil, do_voices_log: true)
     super
 
     # Create instruments

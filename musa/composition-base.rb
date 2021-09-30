@@ -11,7 +11,7 @@ class CompositionBase
   include Musa::Clock
   include Musa::Sequencer
 
-  def initialize(realtime: false, do_voices_log: true)
+  def initialize(realtime: false, render3d: false, do_voices_log: true)
     # Sequencer setup
     #
     @sequencer, @clock = create_sequencer(realtime)
@@ -24,14 +24,14 @@ class CompositionBase
 
     # 3D rendering setup and base drawing
     #
-    @probe = Probe3D.new(100, z_scale: 0.1, logger: @logger)
+    @probe = Probe3D.new(100, z_scale: 0.1, logger: @logger) if render3d
   end
 
   private def create_sequencer(real_clock)
     sequencer = Sequencer.new 4, 24, keep_proc_context: true, do_error_log: true
 
     clock = ClockProxy.new(if real_clock
-                             TimerClock.new ticks_per_beat: 24, bpm: 90
+                             TimerClock.new ticks_per_beat: 24, bpm: 90, delayed_ticks_error: 1, logger: sequencer.logger, do_log: true
                            else
                              DummyClock.new { !sequencer.empty? }
                            end)
@@ -43,7 +43,7 @@ class CompositionBase
     sequencer.logger.error!
 
     logger = sequencer.logger.clone
-    logger.error!
+    logger.warn!
 
     logger
   end
@@ -74,14 +74,19 @@ class CompositionBase
     Thread.new do
       block.call
 
-      Thread.new { @clock.run { @sequencer.tick } }
+      Thread.new do
+        @clock.run do
+          @sequencer.tick
+        end
+      end
 
       sleep 0.1
 
       @clock.start
     end
 
-    @probe.run
+    @probe&.run
+    gets unless @probe
 
     @clock.stop
   end

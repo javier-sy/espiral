@@ -1,7 +1,10 @@
-require_relative 'composition-spirals'
+require_relative 'composition-spirals-runner'
 
-class CompositionWithNotesPlaying < CompositionWithSpirals
-  def initialize(realtime: nil, do_voices_log: nil, draw_level1: true, draw_level2: true, draw_level3: true)
+class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
+  include Musa::Scales
+  include Musa::Datasets
+
+  def initialize(realtime: nil, render3d: nil, do_voices_log: nil, draw_level1: true, draw_level2: true, draw_level3: true)
     super
     @chromatic_scale = Scales.default_system.default_tuning.chromatic[0]
 
@@ -14,10 +17,10 @@ class CompositionWithNotesPlaying < CompositionWithSpirals
     if values[0]
       # interpretamos los valores como [pitch/velocity, velocity/pitch, time]
       quantized_duration =
-        duration.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
+        duration.compact.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
 
       note = { grade: (60 + values[0]).to_i,
-               duration: quantized_duration[0],
+               duration: quantized_duration.min,
                velocity: 0, # TODO change!!!! remember it's -5 to +5 range aprox (being a GDV)
                voice: "#{level2}" }.extend(GDV)
 
@@ -32,6 +35,8 @@ class CompositionWithNotesPlaying < CompositionWithSpirals
 
       note[technique.id] = true
 
+      info "Rendering level 2 pitch #{pitch[:pitch]} velocity #{pitch[:velocity]} duration #{pitch[:duration].round(3)}"
+
       instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
     end
   end
@@ -42,24 +47,24 @@ class CompositionWithNotesPlaying < CompositionWithSpirals
     if values[0]
       # interpretamos los valores como [pitch/velocity, velocity/pitch, time]
       quantized_duration =
-        duration.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
+        duration.compact.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
 
       note = { grade: (60 + values[0]).to_i,
-               duration: quantized_duration[0],
+               duration: quantized_duration.min,
                velocity: 0, # TODO change!!!! remember it's -5 to +5 range aprox (being a GDV)
                voice: "#{level2}-#{level3}" }.extend(GDV)
 
       pitch = note.to_pdv(@chromatic_scale)
 
       # When level3 starts before level2 (this happens when level3 rotation ond folding makes it to start before level2)
-      # @level2_x[level2] would be nil. In this case I use the last previous value of the level2 last curve.
+      # @level2_x[level2] is nil. In this case I use the last previous value of the level2 last curve.
       #
-      if @level2_x[level2]
-        timbre = ((@level2_x[level2]) - @level2_box.x_min) / @level2_box.x_range
-      else
-        timbre = ((@level2_x[level2 - 1]) - @level2_box.x_min) / @level2_box.x_range
-        warn "Calculating timbre: @level2_x[#{level2}] has not started yet, using @level2_x[#{level2 - 1}]"
-      end
+      i = level2
+      i -= 1 until @level2_x[i]
+
+      warn "Calculating timbre: @level2_x[#{level2}] has not started yet, using @level2_x[#{i}]" if level2 != i
+
+      timbre = ((@level2_x[i]) - @level2_box.x_min) / @level2_box.x_range
 
       instruments_pool = @instruments_pools[level2 % @instruments_pools.size]
       instrument = instruments_pool.find_free_with(timbre: timbre, pitch: pitch[:pitch])
@@ -94,6 +99,8 @@ class CompositionWithNotesPlaying < CompositionWithSpirals
   end
 end
 
-CompositionWithNotesPlaying.new(realtime: true, draw_level1: false, draw_level2: false, draw_level3: false)
-                           .run(only_draw_matrixes: false, draw_level1: false, draw_level2: true, draw_level3: true)
+CompositionWithNotesPlaying.new(realtime: true, render3d: true,
+                                draw_level1: false, draw_level2: true, draw_level3: true)
+                           .run(play: true,
+                                draw_level1: false, draw_level2: true, draw_level3: true)
 

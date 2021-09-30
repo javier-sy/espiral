@@ -813,3 +813,36 @@ También el nº de vueltas de las espirales de nivel 3.
 Voy a intentar parametrizar el tempo y a cambiar la orientación de las espirales.
 
 Con el tempo parametrizado: ([tag v4](https://github.com/javier-sy/2020-10-05-Espiral/tree/v4))
+
+Estoy modificando la orientación de las espirales de nivel 3, pero parece que la primera no se genera correctamente.
+
+# Martes, 28 septiembre 2021.
+
+El problema con la primera espiral que no comenzaba era que comenzaba antes de tiempo (en tiempo negativo) y no se procesaba bien. He ajustado la generación de las espirales para que no se puedan producir en tiempo negativo.
+
+Es importante añadir un criterio para añadir silencio. Cuando falla una espiral, p.ej., y no se genera salida resulta interesante.
+
+He detectado otro fallo: al iniciar tarda 300 ticks en pasar de la position 1 a la siguiente. Hay demasiado procesamiento en ese inicio.
+Hay que investigar qué ocurre.
+No parece ser el motor de renderización 3d.
+
+# Miércoles, 29 septiembre 2021.
+
+El problema es que al comenzar el compás 1 se lanzan todos los comandos play que,
+al final, son muchos. Eso hace que la inicialización sea lenta.
+
+Creo que la solución pasa por hacer que Sequencer permita programar anticipadamente (al menos con play_timed).
+He añadido el parámetro at: a play_timed (musa-dsl v0.24.20)
+
+Otro error: a veces se salta una nota. Creo que es porque considera que la nota anterior aún no ha terminado. Hay que revisarlo.
+
+# Jueves, 30 septiembre 2021.
+
+Se saltaba una nota porque el valor de x no había cambiado (aunque el de y, sí). 
+Lo he modificado para que genere una nota cuando cambia cualquiera de los dos valores. El valor que no cambia se mantiene con el valor anterior.
+
+Esta versión suena interesante. ([tag v5](https://github.com/javier-sy/2020-10-05-Espiral/tree/v5))
+
+De todos modos aún falta trabajo.
+
+Siguiente cosa: aumentar el tamaño x-y del nivel 2 de modo que haya más variación de los registros al generar el nivel 3.
