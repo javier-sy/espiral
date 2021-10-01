@@ -5,34 +5,6 @@ using Musa::Extension::Matrix
 class CompositionWithSpiralsRunner < CompositionWithSpirals
   def initialize(realtime: false, render3d: nil, do_voices_log: true, draw_level1: true, draw_level2: true, draw_level3: true)
     super
-
-    # @level1_matrix_timed_serie has only 1 element because level 1 spiral has no time folding
-    #
-    @level1_matrix_timed_serie = quantized_timed_series_of_matrix(@level1_matrix).first # TODO: determinar valores máximos de x,y y la cuantizaciónlevel1_matrix_timed_series
-
-    debug "calculating level 1 box..."
-    @level1_box = Boxing.new(@level1_matrix_timed_serie)
-    info "level 1 #{@level1_box}"
-
-    # @level2_matrix_timed_series has several timed series because level 2 has time folding spirals
-    #
-    @level2_matrix_timed_series = quantized_timed_series_of_matrix(@level2_matrix) # TODO: determinar valores máximos de x,y y la cuantización
-
-    debug "calculating level 2 box..."
-    @level2_box = Boxing.new(@level2_matrix_timed_series)
-    info "level 2 #{@level2_box}"
-
-    # level3
-    #
-    @level3_matrix_timed_series_array = @level3_matrix_array.collect.with_index do |level3_matrix|
-      quantized_timed_series_of_matrix(level3_matrix)
-    end
-
-    debug "calculating level 3 box..."
-    @level3_box = Boxing.new(@level3_matrix_timed_series_array.collect { |_| Boxing.new(_) })
-    info "level 3 #{@level3_box}"
-
-    info "level 2 matrix has #{@level2_matrix_timed_series.size} timed series (#{@level3_matrix_array.size} level 3 matrixes)"
   end
 
   def run(play: false, draw_level1: true, draw_level2: true, draw_level3: true)
@@ -138,9 +110,9 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
           end
         end
       end
-    end
 
-    info "... and let's go!", force: true
+      info "... and let's go!", force: true
+    end
   end
 
   protected def render_to_midi_level2(level2:, values:, duration:)
@@ -189,44 +161,6 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
       curve.to_timed_serie(time_start_component: 2, base_duration: 1)
            .flatten_timed
     end
-  end
-end
-
-class Boxing
-  attr_reader :x_min, :x_max, :x_range
-  attr_reader :y_min, :y_max, :y_range
-
-  def initialize(timed_serie_or_timed_series)
-    case timed_serie_or_timed_series
-    when Musa::Series::Serie
-      a = timed_serie_or_timed_series.to_a(restart: true)
-      timed_serie_or_timed_series.restart
-
-      only_values = a.map { |_| _[:value] }
-      only_x = only_values.map { |_| _[0] }.compact
-      only_y = only_values.map { |_| _[1] }.compact
-
-      @x_min, @x_max = only_x.minmax
-      @y_min, @y_max = only_y.minmax
-
-    when Array
-      boxings = timed_serie_or_timed_series.collect { |_| _.is_a?(Boxing) ? _ : Boxing.new(_) }
-
-      @x_min = boxings.collect(&:x_min).min
-      @y_min = boxings.collect(&:y_min).min
-
-      @x_max = boxings.collect(&:x_max).max
-      @y_max = boxings.collect(&:y_max).max
-    else
-      raise ArgumentError, "Unexpected #{timed_serie_or_timed_series.class.name}"
-    end
-
-    @x_range = @x_max - @x_min
-    @y_range = @y_max - @y_min
-  end
-
-  def to_s
-    "Box x: #{@x_min}..#{@x_max} (range #{@x_range} y: #{@y_min}..#{@y_max} (range #{@y_range})"
   end
 end
 

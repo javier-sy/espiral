@@ -1,4 +1,4 @@
-require_relative 'composition-5-spirals-runner'
+require_relative 'composition-4-spirals-runner'
 
 class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
   include Musa::Scales

@@ -845,7 +845,26 @@ Esta versión suena interesante. ([tag v5](https://github.com/javier-sy/2020-10-
 
 Siguiente cosa: aumentar el tamaño x-y del nivel 2 de modo que haya más variación de los registros al generar el nivel 3.
 
-He multiplicado la dimensión x-y del level 2 por 4. Es espectacular.
+He multiplicado la dimensión x-y del level 2 por 4. Es espectacular. 
+Sobre todo cuando entra el contrabass grave. ([tag v6](https://github.com/javier-sy/2020-10-05-Espiral/tree/v6))
 
-"El sueño de la razón produce monstruos" (aguafuerte de Goya)
-Como subtítulo de Espiral: "El despertar de la razón produce monstruos"
+"El sueño de la razón produce monstruos" (aguafuerte de Goya).
+Como subtítulo de Espiral: "El despertar de la razón produce monstruos".
+
+# Viernes, 1 octubre 2021.
+
+He añadido que el radio de las espirales de nivel 3 sea proporcional (entre 3 y 8) a la y del level 2 en que se encuentre.
+
+Versión ([tag v7](https://github.com/javier-sy/2020-10-05-Espiral/tree/v7))
+
+Veo que la instrumentación tiene algunos problemas: los violines no se usan nunca y a menudo falta percusión.
+
+En el harpsichord tb falta a veces rango. Quizás mejor un piano.
+
+Añadir un plato de percusión???? con redoble largo...????
+
+Se me ocurre hacer grupos instrumentales más marcados, no sólo armónicos vs percusivos.
+
+
+
+

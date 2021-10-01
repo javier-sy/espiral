@@ -2,6 +2,7 @@ require_relative 'composition-2-instrumentation'
 
 require_relative '../lib/matrix-operations'
 require_relative '../lib/matrix-custom-operations'
+require_relative '../lib/boxing'
 
 using Musa::Extension::Matrix
 
@@ -53,9 +54,29 @@ class CompositionWithSpirals < CompositionWithInstrumentation
     @level1_matrix = calculate_level1_matrix
     @probe&.render_matrix(@level1_matrix, color: 0xa0a0a0) if draw_level1
 
+    # @level1_matrix_timed_serie has only 1 element because level 1 spiral has no time folding
+
+    @level1_matrix_timed_serie = quantized_timed_series_of_matrix(@level1_matrix).first # TODO: determinar valores máximos de x,y y la cuantizaciónlevel1_matrix_timed_series
+
+    debug "calculating level 1 box..."
+    @level1_box = Boxing.new(@level1_matrix_timed_serie)
+    info "level 1 #{@level1_box}"
+
+    # Compute level 2 spirals
+    #
     @level2_matrix = calculate_level2_matrix
     @probe&.render_matrix(@level2_matrix, color: 0x00f00a) if draw_level2
 
+    # @level2_matrix_timed_series has several timed series because level 2 has time folding spirals
+
+    @level2_matrix_timed_series = quantized_timed_series_of_matrix(@level2_matrix) # TODO: determinar valores máximos de x,y y la cuantización
+
+    debug "calculating level 2 box..."
+    @level2_box = Boxing.new(@level2_matrix_timed_series)
+    info "level 2 #{@level2_box}"
+
+    # Compute level 3 spirals
+    #
     @level3_matrix_array = calculate_level3_matrix_array(@level2_matrix)
 
     if draw_level3
@@ -63,6 +84,18 @@ class CompositionWithSpirals < CompositionWithInstrumentation
         @probe&.render_matrix(level3_matrix, color: 0xf0f000)
       end
     end
+
+    # level3
+
+    @level3_matrix_timed_series_array = @level3_matrix_array.collect.with_index do |level3_matrix|
+      quantized_timed_series_of_matrix(level3_matrix)
+    end
+
+    debug "calculating level 3 box..."
+    @level3_box = Boxing.new(@level3_matrix_timed_series_array.collect { |_| Boxing.new(_) })
+    info "level 3 #{@level3_box}"
+
+    info "level 2 matrix has #{@level2_matrix_timed_series.size} timed series (#{@level3_matrix_array.size} level 3 matrixes)"
   end
 
   private def calculate_level1_matrix
@@ -178,21 +211,25 @@ class CompositionWithSpirals < CompositionWithInstrumentation
       finish = Vector[*curve_timed_serie_a.last[:value]]
 
       direct = (finish - start) / (finish - start).magnitude
-      perpendicular = (direct).cross(Vector[0, 0, 1])
+      perpendicular = direct.cross(Vector[0, 0, 1])
 
       rotate_to = direct * (level2_matrix_p_array.size - i - 1) + perpendicular * i
 
-      center = start + (finish - start) / 2
+      center = (start + finish) / 2
 
       duration = curve_timed_serie_a.last[:time] - curve_timed_serie_a.first[:time]
 
+      radius = (1 + 7 * (start[1] - @level2_box.y_min) / @level2_box.y_range).round.to_i
+
+      info "calculating level 3 matrix #{i}: radius #{radius} duration #{duration}"
+
       spiral = MatrixOperations.spiral(3,
                                        radius_start: 0,
-                                       radius_end: 3,
+                                       radius_end: radius,
                                        length: 3,
                                        resolution: 360).vstack(
                                          MatrixOperations.spiral(2,
-                                                                 radius_start: 3,
+                                                                 radius_start: radius,
                                                                  radius_end: 0,
                                                                  length: 2,
                                                                  z_start: 3,
@@ -201,7 +238,7 @@ class CompositionWithSpirals < CompositionWithInstrumentation
 
       spiral.extend(MatrixCustomOperations)
 
-      (spiral.unit_boxed.scale_to(x: 3, y: 3) * MatrixOperations.rotate_z_to(rotate_to))
+      (spiral.unit_boxed.scale_to(x: radius, y: radius) * MatrixOperations.rotate_z_to(rotate_to))
         .extend(MatrixCustomOperations)
         .scale_to(z: duration)
         .move(center)
