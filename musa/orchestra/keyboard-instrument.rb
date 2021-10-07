@@ -4,7 +4,7 @@ require_relative '../lib/instrument'
 
 using Musa::Extension::InspectNice
 
-class Pianoteq < Instrument
+class Keyboard < Instrument
   def initialize(techniques_set, name, midi_voices:, tick_duration:, logger:)
     has_legato = (techniques_set == :has_legato)
 
@@ -66,14 +66,14 @@ class Pianoteq < Instrument
   end
 end
 
-class Harpsichord_Pianoteq < Pianoteq
+class Harpsichord < Keyboard
   def initialize(...)
     super(nil, ...)
   end
 
 end
 
-class Piano_Pianoteq < Pianoteq
+class Piano < Keyboard
   def initialize(...)
     super(:has_legato, ...)
   end

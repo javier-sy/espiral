@@ -861,10 +861,21 @@ Veo que la instrumentación tiene algunos problemas: los violines no se usan nun
 
 En el harpsichord tb falta a veces rango. Quizás mejor un piano.
 
+Cuando el harpsichord se sale de rango elige mal las notas, les cambia el grado (método put_in_pitch_range).
+
 Añadir un plato de percusión???? con redoble largo...????
 
 Se me ocurre hacer grupos instrumentales más marcados, no sólo armónicos vs percusivos.
 
+# Miércoles, 6 octubre 2021.
 
+He puesto el piano como instrumento del level 2.
+He modificado el pitch_in_range para que cambie la octava sin cambiar el grado.
+Falla algo, no emite notas para el piano.
 
+# Jueves, 7 octubre 2021.
+
+El piano en live no tenía el canal de entrada MIDI correcto.
+
+Versión con piano: ([tag v8](https://github.com/javier-sy/2020-10-05-Espiral/tree/v8))
 

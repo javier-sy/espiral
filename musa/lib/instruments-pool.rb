@@ -45,7 +45,6 @@ class InstrumentsPool
   end
 
   def find_free_with(timbre:, pitch: nil)
-
     start_position = (@instruments.size - 1) * timbre
 
     path = search_path_index(start_position, @instruments.size)

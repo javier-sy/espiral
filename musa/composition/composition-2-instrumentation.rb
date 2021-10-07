@@ -5,6 +5,7 @@ require_relative '../orchestra/ww-instruments-bbc'
 require_relative '../orchestra/brass-instruments-bbc'
 require_relative '../orchestra/tuned-percussions-bbc'
 require_relative '../orchestra/keyboard-instruments-pianoteq'
+require_relative '../orchestra/keyboard-instruments-thegrandeur'
 
 require_relative '../lib/instruments-pool'
 
@@ -97,6 +98,12 @@ class CompositionWithInstrumentation < CompositionBase
     harpshichord_midi_voices = MIDIVoices.new(sequencer: @sequencer, output: tuned_perc_midi_output, channels: 5, do_log: @do_voices_log)
 
     @harpsichord = FEBlanchetHarpsichord.new(midi_voices: harpshichord_midi_voices.voices, tick_duration: @sequencer.tick_duration, logger: @logger)
+
+    # The Grandeur Piano
+    #
+    piano_midi_voices = MIDIVoices.new(sequencer: @sequencer, output: tuned_perc_midi_output, channels: 6, do_log: @do_voices_log)
+
+    @piano = TheGrandeurPiano.new(midi_voices: piano_midi_voices.voices, tick_duration: @sequencer.tick_duration, logger: @logger)
   end
 
   private def select_harmonic_timbres
@@ -127,7 +134,7 @@ class CompositionWithInstrumentation < CompositionBase
     #
     percussive_timbres = [@marimba, @vibraphone, @tubular_bells, @glockenspiel]
 
-    # Harpshichord is used only on level2, so it's excluded here
+    # Harpshichord and piano are used only on level2, so it's excluded here
 
     [harmonic_timbres, percussive_timbres]
   end

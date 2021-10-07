@@ -25,7 +25,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
                voice: "#{level2}" }.extend(GDV)
 
       pitch = note.to_pdv(@chromatic_scale)
-      instrument = @harpsichord
+      instrument = @piano
 
       technique = instrument.find_techniques(:legato).first
       technique ||= instrument.find_techniques(:long).first
@@ -88,12 +88,19 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
   end
 
   private def put_in_pitch_range(instrument, pitch)
-    if instrument.pitch_range.include?(pitch)
-      new_pitch = pitch
-    else
-      new_pitch = (pitch % (instrument.pitch_range.max - instrument.pitch_range.min)) + instrument.pitch_range.min
-      warn "pitch #{pitch} no está incluido en el rango para #{instrument.name}... generando nota #{new_pitch}"
+    new_pitch = pitch
+
+    sign = pitch <=> instrument.pitch_range.last
+    limit = sign.negative? ? instrument.pitch_range.first : instrument.pitch_range.last
+
+    i = 0
+
+    until instrument.pitch_range.include?(new_pitch)
+      new_pitch = (pitch % 12) + ((limit / 12).to_i - i) * 12
+      i += sign
     end
+
+    warn "pitch #{pitch} no está incluido en el rango para #{instrument.name}... generando nota #{new_pitch}" if new_pitch != pitch
 
     new_pitch
   end
