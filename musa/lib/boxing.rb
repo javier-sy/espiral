@@ -1,8 +1,11 @@
 class Boxing
   attr_reader :x_min, :x_max, :x_range
   attr_reader :y_min, :y_max, :y_range
+  attr_reader :magnitude_max
 
   def initialize(timed_serie_or_timed_series)
+    @magnitude_max = 0.0
+
     case timed_serie_or_timed_series
     when Musa::Series::Serie
       a = timed_serie_or_timed_series.to_a(restart: true)
@@ -15,6 +18,9 @@ class Boxing
       @x_min, @x_max = only_x.minmax
       @y_min, @y_max = only_y.minmax
 
+      vector_max = Vector[@x_max, @y_max]
+      @magnitude_max = vector_max.magnitude if vector_max.magnitude > @magnitude_max
+
     when Array
       boxings = timed_serie_or_timed_series.collect { |_| _.is_a?(Boxing) ? _ : Boxing.new(_) }
 
@@ -23,6 +29,8 @@ class Boxing
 
       @x_max = boxings.collect(&:x_max).max
       @y_max = boxings.collect(&:y_max).max
+
+      @magnitude_max = boxings.collect(&:magnitude_max).max
     else
       raise ArgumentError, "Unexpected #{timed_serie_or_timed_series.class.name}"
     end
@@ -32,6 +40,6 @@ class Boxing
   end
 
   def to_s
-    "Box x: #{@x_min}..#{@x_max} (range #{@x_range} y: #{@y_min}..#{@y_max} (range #{@y_range})"
+    "Box x: #{@x_min}..#{@x_max} (range #{@x_range}) y: #{@y_min}..#{@y_max} (range #{@y_range}) magnitude #{@magnitude_max}"
   end
 end

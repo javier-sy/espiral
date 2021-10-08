@@ -7,8 +7,6 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
   def initialize(realtime: nil, render3d: nil, do_voices_log: nil, draw_level1: true, draw_level2: true, draw_level3: true)
     super
     @chromatic_scale = Scales.default_system.default_tuning.chromatic[0]
-
-    @instruments_pools = [@harmonic_instruments, @percussive_instruments, @percussive_instruments]
   end
 
   protected def render_to_midi_level2(level2:, values:, duration:)
@@ -25,7 +23,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
                voice: "#{level2}" }.extend(GDV)
 
       pitch = note.to_pdv(@chromatic_scale)
-      instrument = @piano
+      instrument = @orchestra.piano
 
       technique = instrument.find_techniques(:legato).first
       technique ||= instrument.find_techniques(:long).first
@@ -35,7 +33,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
 
       note[technique.id] = true
 
-      info "Rendering level 2 pitch #{pitch[:pitch]} velocity #{pitch[:velocity]} duration #{pitch[:duration].round(3)}"
+      info "Rendering level 2 pitch #{pitch[:pitch]} velocity #{pitch[:velocity]} duration #{pitch[:duration].round(3)}", force: true
 
       instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
     end
@@ -66,7 +64,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
 
       timbre = ((@level2_x[i]) - @level2_box.x_min) / @level2_box.x_range
 
-      instruments_pool = @instruments_pools[level2 % @instruments_pools.size]
+      instruments_pool = @instruments_pools[@level1_magnitude_ratio * @instruments_pools.size]
       instrument = instruments_pool.find_free_with(timbre: timbre, pitch: pitch[:pitch])
 
       debug "Searching instrument for center #{timbre} and pitch #{pitch[:pitch]} in #{instruments_pool.name}... found #{instrument&.name || 'NOT FOUND!!!'}"

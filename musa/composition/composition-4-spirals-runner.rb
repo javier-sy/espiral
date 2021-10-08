@@ -28,6 +28,8 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
         @level1_y = values[1] if values[1]
         @level1_z = @sequencer.position - 1r
 
+        @level1_magnitude_ratio = Vector[@level1_x, @level1_y].magnitude / @level1_box.magnitude_max
+
         @probe&.render_point('first level', [@level1_x, @level1_y, @level1_z], color: 0x0fffff) if draw_level1
       end
 
@@ -45,7 +47,7 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
         @sequencer.play_timed level2_matrix_quantized_timed_serie, at: 1 do |values, duration:|
           unless @level2_active[i]
             @level2_active[i] = true
-            info "starting level 2 curve #{i} (#{@level2_active.select {|_|_}.count} actives on level 2)"
+            info "starting level 2 curve #{i} (#{@level2_active.compact.count} actives on level 2)"
 
             @clock.bpm = 80 + (90 * (@level1_y - @level1_box.y_min) / @level1_box.y_range).round
             info "setting clock bpm to #{@clock.bpm.to_f}", force: true
@@ -68,7 +70,7 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
       level2_plays.each.with_index do |level2_play, i|
         level2_play.after do
           @level2_active[i] = false
-          info "finished level 2 curve #{i} (remaining #{@level2_active.select {|_|_}.count} actives on level 2)"
+          info "finished level 2 curve #{i} (remaining #{@level2_active.compact.count} actives on level 2)"
         end
       end
 
@@ -88,7 +90,7 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
 
             unless @level3_active[level2_i][i]
               @level3_active[level2_i][i] = true
-              info "starting level 3 curve #{level2_i}-#{i} (#{@level3_active.flatten.select {|_|_}.count} actives on level 3)"
+              info "starting level 3 curve #{level2_i}-#{i} (#{@level3_active.flatten.compact.count} actives on level 3)"
             end
 
             @level3_x[level2_i][i] = values[0] if values[0]
@@ -106,7 +108,7 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
         level3_plays_array[level2_i].each.with_index do |level3_play, i|
           level3_play.after do
             @level3_active[level2_i][i] = false
-            info "finished level 3 #{level2_i}-#{i} (remaining #{@level3_active.flatten.select {|_|_}.count} actives on level 3)"
+            info "finished level 3 #{level2_i}-#{i} (remaining #{@level3_active.flatten.compact.count} actives on level 3)"
           end
         end
       end
