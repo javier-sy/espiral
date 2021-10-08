@@ -879,3 +879,15 @@ El piano en live no tenía el canal de entrada MIDI correcto.
 
 Versión con piano: ([tag v8](https://github.com/javier-sy/2020-10-05-Espiral/tree/v8))
 
+# Viernes, 8 octubre 2021.
+
+He creado 4 grupos de instrumentos (viento madera, metal, cuerdas, percusión) y he creado
+conjuntos de instrumentos que combinan los 4 grupos de forma proporcional a la manitud del level 1.
+Así al principio suenan menos familias simultáneamente y al acercarse al punto máximo de level 1 
+van sonando más familias de instrumentos.
+
+También he subido una octava el conjunto para que llegue a los registros agudos de violines y piccolo.
+
+Versión ([tag v9](https://github.com/javier-sy/2020-10-05-Espiral/tree/v9))
+
+

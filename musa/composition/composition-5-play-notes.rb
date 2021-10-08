@@ -17,7 +17,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
       quantized_duration =
         duration.compact.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
 
-      note = { grade: (60 + values[0]).to_i,
+      note = { grade: (72 + values[0]).to_i,
                duration: quantized_duration.min,
                velocity: 0, # TODO change!!!! remember it's -5 to +5 range aprox (being a GDV)
                voice: "#{level2}" }.extend(GDV)
@@ -33,7 +33,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
 
       note[technique.id] = true
 
-      info "Rendering level 2 pitch #{pitch[:pitch]} velocity #{pitch[:velocity]} duration #{pitch[:duration].round(3)}", force: true
+      info "Rendering level 2 pitch #{pitch[:pitch]} velocity #{pitch[:velocity]} duration #{pitch[:duration].round(3)}"
 
       instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
     end
