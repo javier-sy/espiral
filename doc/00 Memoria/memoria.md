@@ -890,4 +890,27 @@ También he subido una octava el conjunto para que llegue a los registros agudos
 
 Versión ([tag v9](https://github.com/javier-sy/2020-10-05-Espiral/tree/v9))
 
+# Lunes, 11 octubre 2021.
 
+Subo una quinta más porque faltan notas en los registros inferiores. Aún así
+el problema no se resuelve. 
+
+También ocurre que en viento metal se pierden muchas notas por quedar fuera del registro.
+
+Hay que considerar:
+- el rango de cada familia de instrumentos
+- si trasladar el rango de entrada al rango accesible de un instrumento cambiando de octava
+- contemplar el uso del rango central y de los armónicos de los instrumentos (lo cual interacciona con las articulaciones, aún por asignar)
+- los criterios de compatibilidad con el instrumento (es interpretable la nota con la duración y articulación que se pide?)
+- cómo introducir silencios
+
+Por otro lado, ahora mismo la percusión es excesiva (con redoble continuo). 
+Quizás usarla sólo como contraste cuando no hay instrumentos? o en secciones alternativas?
+
+# Jueves, 21 octubre 2021.
+
+Comienzo a analizar la estructura sonora de las articulaciones de cada instrumento para establecer
+dos niveles: un primer nivel de grupos de articulaciones contrastantes (ej. strings legato vs pulsada vs staccatos) y un segundo nivel de niveles de diferenciación dentro 
+del primero (ej. en strings longs legato vs long harmonics).
+
+He añadido un atributo techniques_groups en los instrumentos para representar esos dos niveles.

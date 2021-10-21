@@ -10,6 +10,11 @@ class TunedPercussion_BBC < Instrument
     a = (techniques_set == :a) # marimba, glockenspiel
     b = (techniques_set == :b) # vibraphone
 
+    @techniques_groups = {
+      one_hit: [(:hits_dumped if all), :hits].compact,
+      long: [(:rolls if all || a)].compact
+    }.delete_if { |_, v| v.empty? }
+
     @techniques = {
       [:hits, [:short, :hits]] => 0,
       [:hits_dumped, [:short, :hits, :dumped]] => (2 if all),

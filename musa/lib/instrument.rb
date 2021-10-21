@@ -23,7 +23,7 @@ class Instrument
     @central_pitch_range ||= @pitch_range # if no central pitch range is defined all the range is considered as central
 
     @harmonics_pitch_range ||= nil # if no harmonics are defined nil is used
-    @polyphony = 1 # by default only one note simultaneously
+    @polyphony ||= 1 # by default only one note simultaneously
 
     cache_techniques
   end
@@ -35,6 +35,8 @@ class Instrument
   attr_reader :central_pitch_range
 
   attr_reader :polyphony
+
+  attr_reader :techniques_groups
 
   def techniques # returns canonic symbol id
     @technique_ids

@@ -17,7 +17,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
       quantized_duration =
         duration.compact.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
 
-      note = { grade: (72 + values[0]).to_i,
+      note = { grade: (79 + values[0]).to_i,
                duration: quantized_duration.min,
                velocity: 0, # TODO change!!!! remember it's -5 to +5 range aprox (being a GDV)
                voice: "#{level2}" }.extend(GDV)
@@ -47,7 +47,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
       quantized_duration =
         duration.compact.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
 
-      note = { grade: (60 + values[0]).to_i,
+      note = { grade: (79 + values[0]).to_i,
                duration: quantized_duration.min,
                velocity: 0, # TODO change!!!! remember it's -5 to +5 range aprox (being a GDV)
                voice: "#{level2}-#{level3}" }.extend(GDV)
@@ -81,6 +81,12 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
         instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
       else
         warn "Not found instrument for timbre #{timbre} and pitch #{pitch[:pitch]} in instrument set #{instruments_pool}"
+        @missing_instruments ||= {}
+        @missing_instruments[instruments_pool.name] ||= 0
+        @missing_instruments[instruments_pool.name] += 1
+
+        info "Missing instruments: #{@missing_instruments}", force: true
+
       end
     end
   end

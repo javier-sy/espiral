@@ -1,6 +1,6 @@
 class Boxing
-  attr_reader :x_min, :x_max, :x_range
-  attr_reader :y_min, :y_max, :y_range
+  attr_reader :x_min, :x_max, :x_range, :x_middle
+  attr_reader :y_min, :y_max, :y_range, :y_middle
   attr_reader :magnitude_max
 
   def initialize(timed_serie_or_timed_series)
@@ -17,6 +17,9 @@ class Boxing
 
       @x_min, @x_max = only_x.minmax
       @y_min, @y_max = only_y.minmax
+
+      @x_middle = (@x_min + @x_max) / 2r
+      @y_middle = (@y_min + @y_max) / 2r
 
       vector_max = Vector[@x_max, @y_max]
       @magnitude_max = vector_max.magnitude if vector_max.magnitude > @magnitude_max
@@ -36,10 +39,13 @@ class Boxing
     end
 
     @x_range = @x_max - @x_min
+    @x_middle = (@x_min + @x_max) / 2r
+
     @y_range = @y_max - @y_min
+    @y_middle = (@y_min + @y_max) / 2r
   end
 
   def to_s
-    "Box x: #{@x_min}..#{@x_max} (range #{@x_range}) y: #{@y_min}..#{@y_max} (range #{@y_range}) magnitude #{@magnitude_max}"
+    "Box x: #{@x_min}..#{@x_max} middle #{@x_middle} (range #{@x_range}) y: #{@y_min}..#{@y_max} middle #{@y_middle} (range #{@y_range}) magnitude #{@magnitude_max}"
   end
 end

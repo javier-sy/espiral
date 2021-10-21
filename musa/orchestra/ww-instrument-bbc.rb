@@ -14,6 +14,13 @@ class WoodwindInstrument_BBC < Instrument
     e = (techniques_set == :e) # cor anglais
     f = (techniques_set == :f) # bass flute
 
+    @techniques_groups = {
+      short: [:staccato, (:tenuto if all || b || c || d || e || f), :marcato].compact,
+      long: [:legato, (:long_fltr if all || a || b || c)].compact,
+      multi_note: [:trill_2m, :trill_2M],
+      fx: [:rips, :falls]
+    }
+
     @techniques = {
       [:staccato, :st, [:short, :staccato]] => 4,
       [:tenuto, :t, [:short, :tenuto]] => (5 if all || b || c || d || e || f),
@@ -23,17 +30,11 @@ class WoodwindInstrument_BBC < Instrument
       [:long] => { key_switch: 1, modulators: [:vibrato] },
       [:long_fltr, :fltr, [:long, :flutter]] => ({ key_switch: 7 } if all || a || b || c),
 
-      # no incluyo los trills porque no son técnicas sino ornamentaciones
-      #
-      # [:trill_2M, [:long, :trill, :M2], [:trill, :M2]] => 2,
-      # [:trill_2m, [:long, :trill, :m2], [:trill, :m2]] => 3,
-      #
+      [:trill_2M, [:long, :trill, :M2], [:trill, :M2]] => 2,
+      [:trill_2m, [:long, :trill, :m2], [:trill, :m2]] => 3,
 
-      # no incluyo los rips y falls porque no son técnicas sino ornamentaciones
-      #
-      # [:rips, [:long, :rips]] => { key_switch: 9, modulators: [:speed] },
-      # [:falls, [:long, :falls]] => { key_switch: 10, modulators: [:speed] },
-      #
+      [:rips, [:long, :rips]] => { key_switch: 9, modulators: [:speed] },
+      [:falls, [:long, :falls]] => { key_switch: 10, modulators: [:speed] },
 
       [:legato, :lg] => { key_switch: 0, modulators: [:vibrato] },
 

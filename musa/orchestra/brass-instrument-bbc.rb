@@ -12,6 +12,13 @@ class BrassInstrument_BBC < Instrument
     b = (techniques_set == :b) # contrabass trombone and contrabass tuba
     c = (techniques_set == :c) # cimbasso
 
+    @techniques_groups = {
+      short: [(:staccato_muted if all || a), :staccato, (:marcato_muted if all || a), :marcato].compact,
+      long: [(:long_muted if all || a), (:legato if all || a || b || a_no_muted), (:long_fltr if all || a || a_no_muted)].compact,
+      forced: [:sforzando, :cuivre],
+      multi_note: [(:multitongue if all || a || a_no_muted), (:trill_2m if all), (:trill_2M if all)].compact
+    }
+
     @techniques = {
       [:staccato_muted, :stmt, [:short, :staccato, :muted]] => (11 if all || a),
       [:staccato, :st, [:short, :staccato]] => 2,
@@ -25,10 +32,8 @@ class BrassInstrument_BBC < Instrument
       [:sforzando, :sfz, [:long, :sfz]] => 5,
       [:cuivre, [:long, :cuivre]] => 4,
 
-      # no incluyo los trills porque no son técnicas sino ornamentaciones
-      #
-      # [:trill_2M, [:long, :trill, :M2], [:trill, :M2]] => (8 if all),
-      # [:trill_2m, [:long, :trill, :m2], [:trill, :m2]] => (9 if all),
+      [:trill_2M, [:long, :trill, :M2], [:trill, :M2]] => (8 if all),
+      [:trill_2m, [:long, :trill, :m2], [:trill, :m2]] => (9 if all),
 
       [:legato, :lg] => (0 if all || a || b || a_no_muted),
 

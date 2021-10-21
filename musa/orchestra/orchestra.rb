@@ -45,6 +45,19 @@ class Orchestra
         @instrument_by_tag[tag] << instrument
       end
     end
+
+    @instrument_by_tag.each_pair do |tag, instruments|
+      min_pitch = instruments.collect(&:pitch_range).collect(&:min).min
+      max_pitch = instruments.collect(&:pitch_range).collect(&:max).max
+
+      min_central_pitch = instruments.collect(&:central_pitch_range).collect(&:min).min
+      max_central_pitch = instruments.collect(&:central_pitch_range).collect(&:max).max
+
+      min_harmonics_pitch = instruments.collect(&:harmonics_pitch_range).compact.collect(&:min).min
+      max_harmonics_pitch = instruments.collect(&:harmonics_pitch_range).compact.collect(&:max).max
+
+      logger.info("Orchestra set #{tag} full range #{min_pitch}-#{max_pitch}, central #{min_central_pitch}-#{max_central_pitch}, harmonics #{min_harmonics_pitch}-#{max_harmonics_pitch}", force: true)
+    end
   end
 
   attr_reader :harpsichord, :piano

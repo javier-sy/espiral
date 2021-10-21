@@ -47,25 +47,25 @@ class CompositionBase
     logger
   end
 
-  private def info(text, force: false)
+  def info(text, force: false)
     previous_level = @logger.level
     @logger.level = Logger::INFO if force
     @logger.info(text)
     @logger.level = previous_level if force
   end
 
-  private def debug(text, force: false)
+  def debug(text, force: false)
     previous_level = @logger.level
     @logger.level = Logger::DEBUG if force
     @logger.debug(text) if force
     @logger.level = previous_level if force
   end
 
-  private def warn(text)
+  def warn(text)
     @logger.warn(text)
   end
 
-  private def error(text)
+  def error(text)
     @logger.error(text)
   end
 
@@ -85,6 +85,7 @@ class CompositionBase
     end
 
     @probe&.run
+
     gets unless @probe
 
     @clock.stop

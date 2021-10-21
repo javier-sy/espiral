@@ -9,7 +9,7 @@ class CompositionWithInstrumentation < CompositionBase
 
     # Create instruments
     #
-    @orchestra = Orchestra.new(@sequencer, logger: @logger, do_voices_log: do_voices_log)
+    @orchestra = Orchestra.new(@sequencer, logger: self, do_voices_log: do_voices_log)
 
     # Separate instruments regarding mostly harmonic content vs less-harmonic content
     # Making a pool of each category

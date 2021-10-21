@@ -9,6 +9,14 @@ class StringInstrument_BBC < Instrument
     leader = (techniques_set == :leader)
     section = (techniques_set == :section)
 
+    @techniques_groups = {
+      percussive: [:collegno, :pizzicato, :pizzicato_bartok],
+      short: [:short_hrm, :spiccato, :staccato, (:short_marcato if leader), (:spiccato_cs if section)].compact,
+      long: [:long_hrm, :long_cs, :long_flt, :long_slt, (:long_slp if section), :legato,
+             (:long_marcato if section),
+             (:tremolo_cs if section), (:tremolo_slp if section), :tremolo].compact,
+      long_multi_note: [:trill_2m, :trill_2M] }
+
     @techniques = {
       [:short_hrm, :hrm_s, [:short, :harmonics]] => 14,
       [:collegno, :cl, [:short, :collegno]] => 7,
@@ -27,14 +35,12 @@ class StringInstrument_BBC < Instrument
       [:long] => { key_switch: 1, modulators: [:vibrato] },
       [:long_marcato, :marcato, :mt, [:long, :marcato]] => (16 if section),
 
-      [:tremolo_cs, :trcs, [:tr, :cs], [:tremolo, :consordina], [:long, :tremolo, :consordina]] => (18 if section),
-      [:tremolo_slp, :trslp, [:tr, :slp], [:tremolo, :sulpont], [:long, :tremolo, :sulpont]] => (17 if section),
-      [:tremolo, :tr, [:long, :tremolo]] => 8,
+      [:tremolo_cs, :trcs, [:tr, :cs], [:tremolo, :consordina], [:multi_note, :tremolo, :consordina]] => (18 if section),
+      [:tremolo_slp, :trslp, [:tr, :slp], [:tremolo, :sulpont], [:multi_note, :tremolo, :sulpont]] => (17 if section),
+      [:tremolo, :tr, [:multi_note, :tremolo]] => 8,
 
-      # no incluyo los trills porque no son técnicas sino ornamentaciones
-      #
-      # [:trill_2M, [:long, :trill, :M2], [:trill, :M2]] => 10,
-      # [:trill_2m, [:long, :trill, :m2], [:trill, :m2]] => 11,
+      [:trill_2M, [:multi_note, :trill, :M2], [:trill, :M2]] => 10,
+      [:trill_2m, [:multi_note, :trill, :m2], [:trill, :m2]] => 11,
 
       [:legato, :lg] => { key_switch: 0, modulators: [:vibrato] },
 

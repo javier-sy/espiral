@@ -8,6 +8,9 @@ class Keyboard < Instrument
   def initialize(techniques_set, name, midi_voices:, tick_duration:, logger:)
     has_legato = (techniques_set == :has_legato)
 
+    @techniques_groups = {
+      standard: [:staccato, :standard, (:legato if has_legato)]
+    }
     @techniques = {
       [:staccato, :st, [:short, :staccato]] => -1,
       [:standard, [:long, :standard]] => -1,
