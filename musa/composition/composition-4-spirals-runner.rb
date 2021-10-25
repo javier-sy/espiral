@@ -50,7 +50,7 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
             info "starting level 2 curve #{i} (#{@level2_active.compact.count} actives on level 2)"
 
             @clock.bpm = 80 + (90 * (@level1_y - @level1_box.y_min) / @level1_box.y_range).round
-            info "setting clock bpm to #{@clock.bpm.to_f}", force: true
+            info "setting clock bpm to #{@clock.bpm.to_f}"
           end
 
           if @level2_x[i].nil? && values[0].nil?
@@ -79,9 +79,11 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
       @level3_z = []
       @level3_active = []
 
-      level3_plays_array = @level3_matrix_timed_series_array.collect.with_index do |level3_matrix_quantized_timed_series, level2_i|
-        level3_matrix_quantized_timed_series.collect.with_index do |level3_matrix_quantized_timed_serie, i|
-          @sequencer.play_timed level3_matrix_quantized_timed_serie, at: 1 do |values, duration:|
+      level3_plays_array = @level3_quantized_matrix_timed_series_array.collect.with_index do |level3_quantized_matrix_timed_series, level2_i|
+        level3_quantized_matrix_timed_series.collect.with_index do |level3_quantized_matrix_timed_serie, i|
+
+          @sequencer.play_timed level3_quantized_matrix_timed_serie, at: 1 do |values, duration:|
+
             @level3_x[level2_i] ||= []
             @level3_y[level2_i] ||= []
             @level3_z[level2_i] ||= []

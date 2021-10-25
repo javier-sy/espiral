@@ -87,12 +87,15 @@ class CompositionWithSpirals < CompositionWithInstrumentation
 
     # level3
 
-    @level3_matrix_timed_series_array = @level3_matrix_array.collect.with_index do |level3_matrix|
+    @level3_quantized_matrix_timed_series_array = @level3_matrix_array.collect.with_index do |level3_matrix|
       quantized_timed_series_of_matrix(level3_matrix)
     end
 
     debug "calculating level 3 box..."
-    @level3_box = Boxing.new(@level3_matrix_timed_series_array.collect { |_| Boxing.new(_) })
+
+    @level3_inner_boxes = @level3_quantized_matrix_timed_series_array.collect { |_| Boxing.new(_) }
+    @level3_box = Boxing.new(@level3_inner_boxes)
+
     info "level 3 #{@level3_box}", force: true
 
     info "level 2 matrix has #{@level2_matrix_timed_series.size} timed series (#{@level3_matrix_array.size} level 3 matrixes)"

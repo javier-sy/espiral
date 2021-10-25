@@ -63,6 +63,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
       warn "Calculating timbre: @level2_x[#{level2}] has not started yet, using @level2_x[#{i}]" if level2 != i
 
       timbre = ((@level2_x[i]) - @level2_box.x_min) / @level2_box.x_range
+      articulation1 = ((@level2_y[i]) - @level2_box.y_min) / @level2_box.y_range
 
       instruments_pool = @instruments_pools[@level1_magnitude_ratio * @instruments_pools.size]
       instrument = instruments_pool.find_free_with(timbre: timbre, pitch: pitch[:pitch])
@@ -70,13 +71,24 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
       debug "Searching instrument for center #{timbre} and pitch #{pitch[:pitch]} in #{instruments_pool.name}... found #{instrument&.name || 'NOT FOUND!!!'}"
 
       if instrument
-        technique = instrument.find_techniques(:legato).first
-        technique ||= instrument.find_techniques(:long).first
-        technique ||= instrument.find_techniques(:short).first
+        articulation2 = (values[1] - @level3_inner_boxes[level3].y_min) / @level3_inner_boxes[level3].y_range
 
-        raise "Cannot find a technique for #{instrument.name}!!!!" unless technique
+        techniques_group = instrument.techniques_groups.values[articulation1 * (instrument.techniques_groups.size - 1).round]
+        technique = instrument.technique(techniques_group[articulation2 * (techniques_group.size - 1).round])
 
-        note[technique.id] = true
+        info "selecting articulation #{articulation1}/#{articulation2}: #{technique&.id || 'nil'}"
+
+        if technique.nil?
+          technique = instrument.find_techniques(:legato).first
+          technique ||= instrument.find_techniques(:long).first
+          technique ||= instrument.find_techniques(:short).first
+
+          warn "using default articulation for #{instrument.name}: #{technique.id}"
+        end
+
+        raise "Cannot find a technique #{articulation1}/#{articulation2} for #{instrument.name}!!!!" unless technique
+
+        pitch[technique.id] = true
 
         instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
       else
@@ -86,7 +98,6 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
         @missing_instruments[instruments_pool.name] += 1
 
         info "Missing instruments: #{@missing_instruments}", force: true
-
       end
     end
   end

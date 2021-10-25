@@ -914,3 +914,7 @@ dos niveles: un primer nivel de grupos de articulaciones contrastantes (ej. stri
 del primero (ej. en strings longs legato vs long harmonics).
 
 He añadido un atributo techniques_groups en los instrumentos para representar esos dos niveles.
+
+# Viernes, 22 octubre 2021.
+
+He añadido la renderización de las articulaciones pero hay algún error en el nivel2 de articulaciones.
