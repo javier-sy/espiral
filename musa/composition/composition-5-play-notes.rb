@@ -71,7 +71,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
       # If not found an instrument on the "direct" instruments pool we search for an instrument on the complementary instruments pool
       #
       unless instrument
-        info "Not found instrument for timbre #{timbre} and pitch #{pitch[:pitch]} in direct instruments pool #{instruments_pool}, searching in complementary instruments pool"
+        info "Not found instrument for timbre #{timbre} and pitch #{pitch[:pitch]} in direct instruments pool #{instruments_pool}, searching in complementary instruments pool", force: true
 
         instruments_pool = @instruments_pools[(1.0 - @level1_magnitude_ratio) * @instruments_pools.size]
         instrument = instruments_pool.find_free_with(timbre: timbre, pitch: pitch[:pitch])

@@ -923,3 +923,6 @@ He añadido la renderización de las articulaciones pero hay algún error en el 
 
 Resuelto el problema de selección de la articulación Y ajustando la dinámica de las articulaciones al máximo sale algo bastante interesante.
 ([tag v10](https://github.com/javier-sy/2020-10-05-Espiral/tree/v10))
+
+Hay un problema con notas sonando a la vez en algunos instrumentos monofónicos. No sé si vendrá de 
+la cuantización de las curvas o de los instrumentos adimitiendo más notas de las posibles en alguna condición.
