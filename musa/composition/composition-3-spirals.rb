@@ -247,6 +247,7 @@ class CompositionWithSpirals < CompositionWithInstrumentation
         .move(center)
         .then do |_|
         Matrix[*_._rows.select { |_| _[2] >= 0 }] # Remove points before time 0
+
       end.tap do |_|
         info "level 3 curve #{i} starts at #{_.row(0)} finish at #{_.row(_.row_count-1)}"
       end

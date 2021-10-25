@@ -918,3 +918,8 @@ He añadido un atributo techniques_groups en los instrumentos para representar e
 # Viernes, 22 octubre 2021.
 
 He añadido la renderización de las articulaciones pero hay algún error en el nivel2 de articulaciones.
+
+# Lunes, 25 octubre 2021.
+
+Resuelto el problema de selección de la articulación Y ajustando la dinámica de las articulaciones al máximo sale algo bastante interesante.
+([tag v10](https://github.com/javier-sy/2020-10-05-Espiral/tree/v10))

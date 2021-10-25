@@ -19,7 +19,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
 
       note = { grade: (79 + values[0]).to_i,
                duration: quantized_duration.min,
-               velocity: 0, # TODO change!!!! remember it's -5 to +5 range aprox (being a GDV)
+               velocity: 0, # TODO change!!!! remember it's -5 to +4 range (being a GDV)
                voice: "#{level2}" }.extend(GDV)
 
       pitch = note.to_pdv(@chromatic_scale)
@@ -49,7 +49,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
 
       note = { grade: (79 + values[0]).to_i,
                duration: quantized_duration.min,
-               velocity: 0, # TODO change!!!! remember it's -5 to +5 range aprox (being a GDV)
+               velocity: 4, # TODO change!!!! remember it's -5 to +4 range (being a GDV)
                voice: "#{level2}-#{level3}" }.extend(GDV)
 
       pitch = note.to_pdv(@chromatic_scale)
@@ -68,15 +68,22 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
       instruments_pool = @instruments_pools[@level1_magnitude_ratio * @instruments_pools.size]
       instrument = instruments_pool.find_free_with(timbre: timbre, pitch: pitch[:pitch])
 
-      debug "Searching instrument for center #{timbre} and pitch #{pitch[:pitch]} in #{instruments_pool.name}... found #{instrument&.name || 'NOT FOUND!!!'}"
+      # If not found an instrument on the "direct" instruments pool we search for an instrument on the complementary instruments pool
+      #
+      unless instrument
+        info "Not found instrument for timbre #{timbre} and pitch #{pitch[:pitch]} in direct instruments pool #{instruments_pool}, searching in complementary instruments pool"
+
+        instruments_pool = @instruments_pools[(1.0 - @level1_magnitude_ratio) * @instruments_pools.size]
+        instrument = instruments_pool.find_free_with(timbre: timbre, pitch: pitch[:pitch])
+      end
 
       if instrument
-        articulation2 = (values[1] - @level3_inner_boxes[level3].y_min) / @level3_inner_boxes[level3].y_range
+        articulation2 = (values[1] - @level3_inner_boxes[level2].y_min) / @level3_inner_boxes[level2].y_range
 
         techniques_group = instrument.techniques_groups.values[articulation1 * (instrument.techniques_groups.size - 1).round]
         technique = instrument.technique(techniques_group[articulation2 * (techniques_group.size - 1).round])
 
-        info "selecting articulation #{articulation1}/#{articulation2}: #{technique&.id || 'nil'}"
+        info "selecting articulation #{articulation1.round(2)}/#{articulation2.round(2)} for #{instrument.name}: #{technique&.id || 'nil'}", force: true
 
         if technique.nil?
           technique = instrument.find_techniques(:legato).first
@@ -86,13 +93,13 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
           warn "using default articulation for #{instrument.name}: #{technique.id}"
         end
 
-        raise "Cannot find a technique #{articulation1}/#{articulation2} for #{instrument.name}!!!!" unless technique
+        raise "Cannot find a technique #{articulation1.round(2)}:#{articulation2.round(2)} for #{instrument.name}!!!!" unless technique
 
         pitch[technique.id] = true
 
         instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
       else
-        warn "Not found instrument for timbre #{timbre} and pitch #{pitch[:pitch]} in instrument set #{instruments_pool}"
+        warn "Not found instrument for timbre #{timbre} and pitch #{pitch[:pitch]} in instruments pool #{instruments_pool}"
         @missing_instruments ||= {}
         @missing_instruments[instruments_pool.name] ||= 0
         @missing_instruments[instruments_pool.name] += 1
