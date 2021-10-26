@@ -65,7 +65,7 @@ class Instrument
     @voice_to_midi_voice_map.cleanup
     midi_voice = @voice_to_midi_voice_map[voice]
 
-    if !midi_voice
+    if !midi_voice || midi_voice.active_pitches.count { |_| !_[:note_controls].empty? } >= @polyphony
       midi_voice = @midi_voices.find { |midi_voice| midi_voice.active_pitches.count { |_| !_[:note_controls].empty? } < @polyphony }
     end
 

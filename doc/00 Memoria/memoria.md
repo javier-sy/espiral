@@ -926,3 +926,10 @@ Resuelto el problema de selección de la articulación Y ajustando la dinámica 
 
 Hay un problema con notas sonando a la vez en algunos instrumentos monofónicos. No sé si vendrá de 
 la cuantización de las curvas o de los instrumentos adimitiendo más notas de las posibles en alguna condición.
+
+# Martes, 26 octubre 2021.
+
+Resuelto el problema de instrumentos con más notas que las que permite su polifonía.
+He bajado una 5ª las alturas para que no brille tanto.
+
+

@@ -17,7 +17,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
       quantized_duration =
         duration.compact.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
 
-      note = { grade: (79 + values[0]).to_i,
+      note = { grade: (72 + values[0]).to_i,
                duration: quantized_duration.min,
                velocity: 0, # TODO change!!!! remember it's -5 to +4 range (being a GDV)
                voice: "#{level2}" }.extend(GDV)
@@ -47,10 +47,11 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
       quantized_duration =
         duration.compact.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
 
-      note = { grade: (79 + values[0]).to_i,
+      note = { grade: (72 + values[0]).to_i,
                duration: quantized_duration.min,
                velocity: 4, # TODO change!!!! remember it's -5 to +4 range (being a GDV)
-               voice: "#{level2}-#{level3}" }.extend(GDV)
+               voice: "#{level2}-#{level3}"
+      }.extend(GDV)
 
       pitch = note.to_pdv(@chromatic_scale)
 
