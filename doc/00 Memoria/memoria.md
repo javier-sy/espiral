@@ -930,6 +930,6 @@ la cuantización de las curvas o de los instrumentos adimitiendo más notas de l
 # Martes, 26 octubre 2021.
 
 Resuelto el problema de instrumentos con más notas que las que permite su polifonía.
-He bajado una 5ª las alturas para que no brille tanto.
+He bajado una 5ª las alturas para que no brille tanto. ([tag v11](https://github.com/javier-sy/2020-10-05-Espiral/tree/v11))
 
 
