@@ -1,5 +1,5 @@
 require 'set'
-require 'unimidi'
+require 'midi-communications'
 require 'musa-dsl'
 
 require_relative '../orchestra/string-instruments-bbc'
@@ -56,7 +56,7 @@ class Orchestra
       min_harmonics_pitch = instruments.collect(&:harmonics_pitch_range).compact.collect(&:min).min
       max_harmonics_pitch = instruments.collect(&:harmonics_pitch_range).compact.collect(&:max).max
 
-      logger.info("Orchestra set #{tag} full range #{min_pitch}-#{max_pitch}, central #{min_central_pitch}-#{max_central_pitch}, harmonics #{min_harmonics_pitch}-#{max_harmonics_pitch}", force: true)
+      logger.info("Orchestra set #{tag} full range #{min_pitch}-#{max_pitch}, central #{min_central_pitch}-#{max_central_pitch}, harmonics #{min_harmonics_pitch}-#{max_harmonics_pitch}")
     end
   end
 
@@ -65,11 +65,11 @@ class Orchestra
   private def create_instruments(sequencer, logger, do_voices_log)
     # MIDI rendering setup
     #
-    violins_midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[1]
-    strings_midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[2]
-    ww_midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[3]
-    brass_midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[4]
-    tuned_perc_midi_output = UniMIDI::Output.all.select { |x| /Driver IAC/ =~ x.name }[5]
+    violins_midi_output = MIDICommunications::Output.all.select { |x| x.name == 'Espiral (violins)' }.first
+    strings_midi_output = MIDICommunications::Output.all.select { |x| x.name == 'Espiral (other strings)' }.first
+    ww_midi_output = MIDICommunications::Output.all.select { |x| x.name == 'Espiral (woodwinds)' }.first
+    brass_midi_output = MIDICommunications::Output.all.select { |x| x.name == 'Espiral (brass)' }.first
+    tuned_perc_midi_output = MIDICommunications::Output.all.select { |x| x.name == 'Espiral (tuned percussion)' }.first
 
     # Strings definition
     #
@@ -156,5 +156,11 @@ class Orchestra
 
   def complete
     @timbres.keys
+  end
+
+  def status
+    @timbres.keys.collect do |instrument|
+      [instrument.name, instrument.played_notes_count]
+    end.to_h.merge({ piano: @piano.played_notes_count, harpsichord: @harpsichord.played_notes_count })
   end
 end

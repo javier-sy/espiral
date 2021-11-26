@@ -15,8 +15,9 @@ class BrassInstrument_BBC < Instrument
     @techniques_groups = {
       short: [(:staccato_muted if all || a), :staccato, (:marcato_muted if all || a), :marcato].compact,
       long: [(:long_muted if all || a), (:legato if all || a || b || a_no_muted), (:long_fltr if all || a || a_no_muted)].compact,
-      forced: [:sforzando, :cuivre],
-      multi_note: [(:multitongue if all || a || a_no_muted), (:trill_2m if all), (:trill_2M if all)].compact
+      long_forced: [:sforzando, :cuivre],
+      multi_note: [(:multitongue if all || a || a_no_muted)].compact,
+      long_multi_note: [(:trill_2m if all), (:trill_2M if all)].compact
     }
 
     @techniques = {

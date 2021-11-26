@@ -9,7 +9,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
     @chromatic_scale = Scales.default_system.default_tuning.chromatic[0]
   end
 
-  protected def render_to_midi_level2(level2:, values:, duration:)
+  protected def render_to_midi_level2(level2:, values:, velocity_ratio:, duration:)
     super
 
     if values[0]
@@ -19,7 +19,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
 
       note = { grade: (72 + values[0]).to_i,
                duration: quantized_duration.min,
-               velocity: 0, # TODO change!!!! remember it's -5 to +4 range (being a GDV)
+               velocity: (velocity_ratio * 9) - 3.0, # remember it's -5.0 to +4.0 range (being a GDV)
                voice: "#{level2}" }.extend(GDV)
 
       pitch = note.to_pdv(@chromatic_scale)
@@ -43,18 +43,6 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
     super
 
     if values[0]
-      # interpretamos los valores como [pitch/velocity, velocity/pitch, time]
-      quantized_duration =
-        duration.compact.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
-
-      note = { grade: (72 + values[0]).to_i,
-               duration: quantized_duration.min,
-               velocity: 4, # TODO change!!!! remember it's -5 to +4 range (being a GDV)
-               voice: "#{level2}-#{level3}"
-      }.extend(GDV)
-
-      pitch = note.to_pdv(@chromatic_scale)
-
       # When level3 starts before level2 (this happens when level3 rotation ond folding makes it to start before level2)
       # @level2_x[level2] is nil. In this case I use the last previous value of the level2 last curve.
       #
@@ -63,8 +51,23 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
 
       warn "Calculating timbre: @level2_x[#{level2}] has not started yet, using @level2_x[#{i}]" if level2 != i
 
+      velocity_ratio = @level2_magnitude_ratio[i]
+
+      # interpretamos los valores como [pitch/velocity, velocity/pitch, time]
+      quantized_duration =
+        duration.compact.collect { |d| @sequencer.quantize_position(@sequencer.position + d) - @sequencer.position if d }
+
+      note = { grade: (72 + values[0]).to_i,
+               duration: quantized_duration.min,
+               velocity: (velocity_ratio * 9) - 3.0, # remember it's -5.0 to +4.0 range (being a GDV)
+               voice: "#{level2}-#{level3}" }.extend(GDV)
+
+      pitch = note.to_pdv(@chromatic_scale)
+
       timbre = ((@level2_x[i]) - @level2_box.x_min) / @level2_box.x_range
-      articulation1 = ((@level2_y[i]) - @level2_box.y_min) / @level2_box.y_range
+
+      # articulation1 = ((@level2_y[i]) - @level2_box.y_min) / @level2_box.y_range
+      articulation1 = ((level2 % 5.0) / 5.0).round(2)
 
       instruments_pool = @instruments_pools[@level1_magnitude_ratio * @instruments_pools.size]
       instrument = instruments_pool.find_free_with(timbre: timbre, pitch: pitch[:pitch])
@@ -72,9 +75,9 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
       # If not found an instrument on the "direct" instruments pool we search for an instrument on the complementary instruments pool
       #
       unless instrument
-        info "Not found instrument for timbre #{timbre} and pitch #{pitch[:pitch]} in direct instruments pool #{instruments_pool}, searching in complementary instruments pool", force: true
+        info "Not found instrument for timbre #{timbre} and pitch #{pitch[:pitch]} in direct instruments pool #{instruments_pool}, searching in complementary instruments pool"
 
-        instruments_pool = @instruments_pools[(1.0 - @level1_magnitude_ratio) * @instruments_pools.size]
+        instruments_pool = @instruments_pools[((@level1_magnitude_ratio - 0.5) % 1.0) * @instruments_pools.size]
         instrument = instruments_pool.find_free_with(timbre: timbre, pitch: pitch[:pitch])
       end
 
@@ -84,7 +87,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
         techniques_group = instrument.techniques_groups.values[articulation1 * (instrument.techniques_groups.size - 1).round]
         technique = instrument.technique(techniques_group[articulation2 * (techniques_group.size - 1).round])
 
-        info "selecting articulation #{articulation1.round(2)}/#{articulation2.round(2)} for #{instrument.name}: #{technique&.id || 'nil'}", force: true
+        info "selecting articulation #{articulation1.round(2)}/#{articulation2.round(2)} for #{instrument.name}: #{technique&.id || 'nil'}"
 
         if technique.nil?
           technique = instrument.find_techniques(:legato).first
@@ -100,12 +103,12 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
 
         instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }
       else
-        warn "Not found instrument for timbre #{timbre} and pitch #{pitch[:pitch]} in instruments pool #{instruments_pool}"
+        warn "Not found alternative instrument for timbre #{timbre} and pitch #{pitch[:pitch]} in instruments pool #{instruments_pool}"
         @missing_instruments ||= {}
         @missing_instruments[instruments_pool.name] ||= 0
         @missing_instruments[instruments_pool.name] += 1
 
-        info "Missing instruments: #{@missing_instruments}", force: true
+        info "Missing instruments: #{@missing_instruments}"
       end
     end
   end
@@ -124,6 +127,26 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
     end
 
     warn "pitch #{pitch} no está incluido en el rango para #{instrument.name}... generando nota #{new_pitch}" if new_pitch != pitch
+
+    new_pitch
+  end
+
+
+  def _put_in_pitch_range(pitch)
+    new_pitch = pitch
+
+    sign = pitch <=> 60
+    limit = sign.negative? ? 40 : 60
+
+    i = 0
+
+    until (40..60).include?(new_pitch)
+      puts "i = #{i}"
+      new_pitch = (pitch % 12) + ((limit / 12).to_i - i) * 12
+      i += sign
+    end
+
+    warn "pitch #{pitch} no está incluido en el rango ... generando nota #{new_pitch}" if new_pitch != pitch
 
     new_pitch
   end

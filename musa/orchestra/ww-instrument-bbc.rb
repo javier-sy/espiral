@@ -17,7 +17,7 @@ class WoodwindInstrument_BBC < Instrument
     @techniques_groups = {
       short: [:staccato, (:tenuto if all || b || c || d || e || f), :marcato].compact,
       long: [:legato, (:long_fltr if all || a || b || c)].compact,
-      multi_note: [:trill_2m, :trill_2M],
+      long_multi_note: [:trill_2m, :trill_2M],
       fx: [:rips, :falls]
     }
 

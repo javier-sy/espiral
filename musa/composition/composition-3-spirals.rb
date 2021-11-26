@@ -73,7 +73,7 @@ class CompositionWithSpirals < CompositionWithInstrumentation
 
     debug "calculating level 2 box..."
     @level2_box = Boxing.new(@level2_matrix_timed_series)
-    info "level 2 #{@level2_box}", force: true
+    info "level 2 #{@level2_box}"
 
     # Compute level 3 spirals
     #
@@ -96,7 +96,7 @@ class CompositionWithSpirals < CompositionWithInstrumentation
     @level3_inner_boxes = @level3_quantized_matrix_timed_series_array.collect { |_| Boxing.new(_) }
     @level3_box = Boxing.new(@level3_inner_boxes)
 
-    info "level 3 #{@level3_box}", force: true
+    info "level 3 #{@level3_box}"
 
     info "level 2 matrix has #{@level2_matrix_timed_series.size} timed series (#{@level3_matrix_array.size} level 3 matrixes)"
   end

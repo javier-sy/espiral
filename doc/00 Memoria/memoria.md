@@ -933,3 +933,45 @@ Resuelto el problema de instrumentos con más notas que las que permite su polif
 He bajado una 5ª las alturas para que no brille tanto. ([tag v11](https://github.com/javier-sy/2020-10-05-Espiral/tree/v11))
 
 
+# Lunes, 22 noviembre 2021.
+
+Retomo espiral tras estar un mes preparando musa lce for live.
+Comienzo a añadir dinámicas, primero a la línea de piano, que da algunos problemas técnicos (aparentes, que luego no eran)
+
+# Martes, 23 noviembre 2021.
+
+Sigo con la línea de piano y comienzo a añadir la dinámica al resto de instrumentos.
+
+# Miércoles, 24 noviembre 2021.
+
+Se me ocurre que en lugar de elegir la instrumentación en base al continuo tímbrico, seleccionarla
+además en base predominancia de notas long vs notas short; con contraste entre espirales de nivel 3.
+También sería interesante seleccionarlas en base a incluir los registros más intensos o no (p.ej. cuivré en brass)
+
+He resuelto que envíe los midi cc1 y cc11 para las notas long y legato. 
+Falta confirmar que la intensidad es correcta (mapear bien los niveles).
+
+# Jueves, 25 noviembre 2021.
+
+He cambiado la selección de instrumento para que si no encuentra el instrumento en el pool inicial
+vaya a buscar el complementario en el pool (i + 0.5) % 1.0, en lugar de en 1-i 
+(que era una fórmula incorrecta para buscar el complementario).
+
+También he cambiado la selección del grupo de articulaciones en el nivel 3: ahora va rotando 
+según estamos en espirales más avanzadas (módulo 5).
+
+```
+articulation1 = ((level2 % 5.0) / 5.0).round(2)
+```
+
+Revisar cuántas articulaciones e instrumentos quedan sin usar.
+Ajustar los niveles para asegurar que suenan mínimamente las primeras articulaciones suaves.
+
+# Viernes, 26 noviembre 2021.
+
+He ajustado los niveles para que las notas cortas y de nivel bajo suenen mínimamente.
+He añadido un log para ver el uso de los instrumentos.
+
+([tag v12](https://github.com/javier-sy/2020-10-05-Espiral/tree/v12))
+
+Sería interesante generar un fichero csv con la información simbólica de lo que suena para analizarlo y comprobar qué ocurre.

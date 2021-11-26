@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 ruby '2.7.4'
 
-gem 'musa-dsl', '~> 0.23', '>= 0.23.20'
-gem 'unimidi'
+gem 'midi-communications'
+gem 'musa-dsl', '~> 0.26', '>= 0.26.2'
 
 gem 'mittsu'

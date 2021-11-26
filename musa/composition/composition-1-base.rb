@@ -1,5 +1,5 @@
 require 'musa-dsl'
-require 'unimidi'
+require 'midi-communications'
 require 'forwardable'
 
 require_relative '../lib/probe-3d'

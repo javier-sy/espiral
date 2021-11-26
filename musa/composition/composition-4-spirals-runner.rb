@@ -11,14 +11,19 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
     super() do
       next unless play
 
-      info "Preparing players...", force: true
+      info "Preparing players..."
 
       every_turn = nil
       @sequencer.at 1 do
         @turns = 0
 
         every_turn = @sequencer.every LEVEL1_BARS_PER_TURN do
-          info "turn #{@turns}"
+          info "turn #{@turns} status"
+          info "------------------"
+          @orchestra.status.each_pair do |name, count|
+            info "#{name}\t\t#{count}"
+          end
+          
           @turns += 1
         end
       end
@@ -42,6 +47,7 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
       @level2_y = []
       @level2_z = []
       @level2_active = []
+      @level2_magnitude_ratio = []
 
       level2_plays = @level2_matrix_timed_series.collect.with_index do |level2_matrix_quantized_timed_serie, i|
         @sequencer.play_timed level2_matrix_quantized_timed_serie, at: 1 do |values, duration:|
@@ -50,7 +56,7 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
             info "starting level 2 curve #{i} (#{@level2_active.compact.count} actives on level 2)"
 
             @clock.bpm = 70 + (120 * (@level1_y - @level1_box.y_min) / @level1_box.y_range).round
-            info "setting clock bpm to #{@clock.bpm.to_f}", force: true
+            info "setting clock bpm to #{@clock.bpm.to_f}"
           end
 
           if @level2_x[i].nil? && values[0].nil?
@@ -61,7 +67,9 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
           @level2_y[i] = values[1] if values[1]
           @level2_z[i] = @sequencer.position - 1r
 
-          render_to_midi_level2 level2: i, values: [@level2_x[i], @level2_y[i]], duration: duration
+          @level2_magnitude_ratio[i] = Vector[@level2_x[i], @level2_y[i]].magnitude / @level2_box.magnitude_max
+
+          render_to_midi_level2 level2: i, values: [@level2_x[i], @level2_y[i]], velocity_ratio: @level1_magnitude_ratio, duration: duration
 
           @probe&.render_point("second level line #{i}", [@level2_x[i], @level2_y[i], @level2_z[i]], color: 0x00a0a0) if draw_level2
         end
@@ -101,7 +109,10 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
 
             @probe&.render_point("second level curve #{level2_i} third level curve #{i}", [@level3_x[level2_i][i], @level3_y[level2_i][i], @level3_z[level2_i][i]], color: 0xffa0a0) if draw_level3
 
-            render_to_midi_level3 level2: level2_i, level3: i, values: [@level3_x[level2_i][i], @level3_y[level2_i][i]], duration: duration
+            render_to_midi_level3 level2: level2_i,
+                                  level3: i,
+                                  values: [@level3_x[level2_i][i], @level3_y[level2_i][i]],
+                                  duration: duration
           end
         end
       end
@@ -115,12 +126,12 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
         end
       end
 
-      info "... and let's go!", force: true
+      info "... and let's go!"
     end
   end
 
-  protected def render_to_midi_level2(level2:, values:, duration:)
-    info "rendering level 2 #{level2} values #{values} duration #{duration}"
+  protected def render_to_midi_level2(level2:, values:, velocity_ratio:, duration:)
+    info "rendering level 2 #{level2} values #{values} velocity_ratio #{velocity_ratio} duration #{duration}"
   end
 
   protected def render_to_midi_level3(level2:, level3:, values:, duration:)
@@ -147,16 +158,15 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
            .to_a
            .tap { |_| _.delete_at(2) } # we don't want time dimension itself to be quantized
            .collect do |_|
-        # _.quantize(step: quantization_step, predictive: true, stops: false)
-        _.quantize(step: quantization_step, predictive: true, stops: false)
-         .anticipate do |_, c, n|
-          if n
-            c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] }
-          else
-            c
-          end
-        end
-      end.then { |_| TIMED_UNION(*_) }
+            _.quantize(step: quantization_step, predictive: true, stops: false)
+               .anticipate do |_, c, n|
+                if n
+                  c.clone.tap { |_| _[:next_value] = (c[:value].nil? || c[:value] == n[:value]) ? nil : n[:value] }
+                else
+                  c
+                end
+               end
+           end.then { |_| TIMED_UNION(*_) }
     end
   end
 

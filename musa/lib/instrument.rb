@@ -10,6 +10,7 @@ class Instrument
     @midi_voices = midi_voices
     @tick_duration = tick_duration
     @logger = logger
+    @played_notes_count = 0
 
     @voice_to_midi_voice_map = {}
 
@@ -38,6 +39,8 @@ class Instrument
 
   attr_reader :techniques_groups
 
+  attr_reader :played_notes_count
+
   def techniques # returns canonic symbol id
     @technique_ids
   end
@@ -60,7 +63,7 @@ class Instrument
     pitch ||= pitch_note
     techniques = techniques.select { |_, v| v }
 
-    technique, effective_duration, effective_velocity = calculate_technique(duration, velocity, normalize(techniques))
+    technique, effective_duration, effective_velocity = calculate_technique(pitch, duration, velocity, normalize(techniques))
 
     @voice_to_midi_voice_map.cleanup
     midi_voice = @voice_to_midi_voice_map[voice]
@@ -89,6 +92,7 @@ class Instrument
       logger_method = :warn
     end
 
+    @played_notes_count += 1
     @logger.send(logger_method,
                 "#{@name}: "\
                 "voice #{voice} "\
@@ -98,13 +102,31 @@ class Instrument
                 "#{techniques.inspect} "\
                 "#{voice_info}")
 
-    midi_voice.note technique.key_switch, duration: @tick_duration if technique && technique.key_switch > -1
-    midi_voice.note pitch, duration: effective_duration, velocity: effective_velocity if midi_voice
+    midi_voice.note technique.key_switch, duration: @tick_duration if technique&.key_switch > -1
+
+    if midi_voice
+      if (technique.tags === :long || technique.tags === :legato) && @polyphony == 1
+        midi_voice.controller[:mod_wheel] = effective_velocity
+        midi_voice.controller[:expression] = effective_velocity
+      else
+        midi_voice.controller[:mod_wheel] = midi_voice.controller[:expression] = 127
+      end
+
+      midi_voice.note pitch, duration: effective_duration, velocity: effective_velocity
+    end
   end
 
-  protected def calculate_technique(duration, velocity, techniques)
+  protected def calculate_technique(pitch, duration, velocity, techniques)
     @logger.warn { "#{@name}: calculating technique: losing techniques except first one #{techniques}!!!" } if techniques.size > 1
-    return technique(techniques&.keys&.first), duration, velocity
+    technique = technique(techniques&.keys&.first)
+
+    effective_duration = 1/4r if technique.tags.include?(:short)
+    effective_duration ||= duration
+
+    effective_velocity = 64 + velocity / 2 if technique.tags.include?(:short)
+    effective_velocity ||= velocity
+
+    return technique, effective_duration, effective_velocity
   end
 
   private def normalize(techniques)
@@ -136,7 +158,7 @@ class Instrument
         when Symbol
           if !canonic
             canonic = technique
-            info = parse_info(canonic, raw_info)
+            info = parse_info(canonic, technique_ids, raw_info)
 
             @techniques_cache[canonic] = info
             @technique_ids << canonic
@@ -164,16 +186,18 @@ class Instrument
     end
   end
 
-  private def parse_info(technique_id, element)
+  private def parse_info(technique_id, technique_ids, element)
+    tags = Set[*technique_ids.flatten.uniq]
+
     case element
     when Numeric
-      TechniqueInfo.new(id: technique_id, key_switch: element, modulators: [])
+      TechniqueInfo.new(id: technique_id, key_switch: element, tags: tags, modulators: [])
     when Hash
-      TechniqueInfo.new(id: technique_id, **element)
+      TechniqueInfo.new(id: technique_id, tags: tags, **element)
     end
   end
 
-  TechniqueInfo = Struct.new(:id, :key_switch, :modulators, keyword_init: true)
+  TechniqueInfo = Struct.new(:id, :key_switch, :modulators, :tags, keyword_init: true)
 
   private_constant :TechniqueInfo
 end
