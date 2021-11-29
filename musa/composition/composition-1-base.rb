@@ -3,6 +3,7 @@ require 'midi-communications'
 require 'forwardable'
 
 require_relative '../lib/probe-3d'
+require_relative '../lib/render-json'
 
 using Musa::Extension::InspectNice
 
@@ -24,6 +25,8 @@ class CompositionBase
     # 3D rendering setup and base drawing
     #
     @probe = Probe3D.new(100, z_scale: 0.1, logger: @logger) if render3d
+
+    RenderJSON.instance.open('played.json')
   end
 
   private def create_sequencer(real_clock)
@@ -89,6 +92,7 @@ class CompositionBase
     gets unless @probe
 
     @clock.stop
+    RenderJSON.instance.close
   end
 end
 

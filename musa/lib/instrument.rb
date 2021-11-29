@@ -26,6 +26,8 @@ class Instrument
     @harmonics_pitch_range ||= nil # if no harmonics are defined nil is used
     @polyphony ||= 1 # by default only one note simultaneously
 
+    @short_duration ||= 1/4r
+
     cache_techniques
   end
 
@@ -59,7 +61,7 @@ class Instrument
     @midi_voices.collect { |midi_voice| @polyphony - midi_voice.active_pitches.count { |_| !_[:note_controls].empty? } }.sum
   end
 
-  def note(pitch_note = nil, pitch: nil, voice:, duration:, velocity:, **techniques)
+  def note(pitch_note = nil, pitch: nil, voice:, duration:, velocity:, level2: nil, level3: nil, **techniques)
     pitch ||= pitch_note
     techniques = techniques.select { |_, v| v }
 
@@ -113,6 +115,16 @@ class Instrument
       end
 
       midi_voice.note pitch, duration: effective_duration, velocity: effective_velocity
+
+      RenderJSON.instance.render position: midi_voice.sequencer.position.to_f,
+                                 instrument: @name,
+                                 level2: level2,
+                                 level3: level3,
+                                 pitch: pitch,
+                                 articulation: technique.id,
+                                 articulation_tags: technique.tags.to_a,
+                                 duration: effective_duration.to_f,
+                                 velocity: effective_velocity
     end
   end
 
@@ -120,7 +132,7 @@ class Instrument
     @logger.warn { "#{@name}: calculating technique: losing techniques except first one #{techniques}!!!" } if techniques.size > 1
     technique = technique(techniques&.keys&.first)
 
-    effective_duration = 1/4r if technique.tags.include?(:short)
+    effective_duration = @short_duration if technique.tags.include?(:short)
     effective_duration ||= duration
 
     effective_velocity = 64 + velocity / 2 if technique.tags.include?(:short)

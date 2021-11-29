@@ -975,3 +975,13 @@ He añadido un log para ver el uso de los instrumentos.
 ([tag v12](https://github.com/javier-sy/2020-10-05-Espiral/tree/v12))
 
 Sería interesante generar un fichero csv con la información simbólica de lo que suena para analizarlo y comprobar qué ocurre.
+
+# Lunes, 29 noviembre 2021.
+
+He añadido la generación de un fichero json que registra la salida de notas para analizar en jupyterlab.
+He pasado a constantes todas las apariciones de valores fijos.
+
+La idea es hacer fácil la generación de alternativas.
+
+([tag v13](https://github.com/javier-sy/2020-10-05-Espiral/tree/v13))
+

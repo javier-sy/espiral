@@ -55,7 +55,7 @@ class CompositionWithSpiralsRunner < CompositionWithSpirals
             @level2_active[i] = true
             info "starting level 2 curve #{i} (#{@level2_active.compact.count} actives on level 2)"
 
-            @clock.bpm = 70 + (120 * (@level1_y - @level1_box.y_min) / @level1_box.y_range).round
+            @clock.bpm = BPM_MIN + (BPM_RANGE * (@level1_y - @level1_box.y_min) / @level1_box.y_range).round
             info "setting clock bpm to #{@clock.bpm.to_f}"
           end
 
