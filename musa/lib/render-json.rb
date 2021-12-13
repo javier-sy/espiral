@@ -11,13 +11,15 @@ class RenderJSON
 
   def open(path)
     @file = File.open(path, 'w')
+    @file.puts('[')
   end
 
   def close
+    @file.puts(']')
     @file.close
   end
 
   def render(**hash)
-    @file.puts(hash.to_json)
+    @file.puts("#{hash.to_json},")
   end
 end

@@ -156,7 +156,7 @@ class Instrument
     effective_velocity = 64 + velocity / 2 if technique.tags.include?(:short)
     effective_velocity ||= velocity
 
-    info "Calculating breath: original duration #{duration.to_f.round(2)} with breath durations #{effective_duration.collect { |_| _.to_f.round(2) }}" if effective_duration.size > 1
+    @logger.info "Calculating breath: original duration #{duration.to_f.round(2)} with breath durations #{effective_duration.collect { |_| _.to_f.round(2) }}" if effective_duration.size > 1
 
     return technique, effective_duration, effective_velocity
   end

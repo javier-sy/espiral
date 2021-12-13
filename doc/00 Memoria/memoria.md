@@ -1030,3 +1030,10 @@ Lo he implementado pero tiene algún fallo que genera notas ultracortas. A ver m
 # Lunes, 13 diciembre 2021.
 
 La fórmula para calcular la respiración en notas largas estaba mal. Corregida.
+
+Versión ([tag v14](https://github.com/javier-sy/2020-10-05-Espiral/tree/v14))
+
+El resultado es interesante. El final un poco pobre.
+
+Primer cambio de parámetros (en composition-3-spirals.rb): 
+
