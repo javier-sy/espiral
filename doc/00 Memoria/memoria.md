@@ -1035,5 +1035,4 @@ Versión ([tag v14](https://github.com/javier-sy/2020-10-05-Espiral/tree/v14))
 
 El resultado es interesante. El final un poco pobre.
 
-Primer cambio de parámetros (en composition-3-spirals.rb): Variante 1 ([branch variants/variant1](https://github.com/javier-sy/espiral/tree/variants/variant1))
-
+Primer cambio de parámetros (en composition-3-spirals.rb): Variante 1.
