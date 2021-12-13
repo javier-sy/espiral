@@ -1034,9 +1034,9 @@ Versión ([tag v14](https://github.com/javier-sy/2020-10-05-Espiral/tree/v14)).
 
 El resultado es interesante. El final un poco pobre.
 
-Primer cambio de parámetros (en composition-3-spirals.rb): [Variante 1]().
+Primer cambio de parámetros (en composition-3-spirals.rb): [Variante 1](https://github.com/javier-sy/espiral/tree/master/musa.variant1).
 
-Segundo cambio de parámetros (en composition-3-spirals.rb): [Variante 2]().
+Segundo cambio de parámetros (en composition-3-spirals.rb): [Variante 2](https://github.com/javier-sy/espiral/tree/master/musa.variant2).
 
 He quitado la espacialización con ambisonics porque se oye mejor con la mezcla "nativa".
 
