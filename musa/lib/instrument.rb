@@ -1,6 +1,7 @@
 require_relative 'instrument-helper'
 
 using Musa::Extension::InspectNice
+using Musa::Extension::Arrayfy
 
 class Instrument
   include InstrumentHelper
@@ -21,12 +22,13 @@ class Instrument
     end
 
     @pitch_range ||= 0..127 # default pitch range is all midi pitches
-    @central_pitch_range ||= @pitch_range # if no central pitch range is defined all the range is considered as central
+    @best_pitch_range ||= @pitch_range # if no central pitch range is defined all the range is considered as central
 
     @harmonics_pitch_range ||= nil # if no harmonics are defined nil is used
     @polyphony ||= 1 # by default only one note simultaneously
 
-    @short_duration ||= 1/4r
+    @short_duration ||= 1/8r
+    @max_duration_in_seconds_per_velocity ||= nil
 
     cache_techniques
   end
@@ -35,7 +37,7 @@ class Instrument
 
   attr_reader :pitch_range
   attr_reader :harmonics_pitch_range
-  attr_reader :central_pitch_range
+  attr_reader :best_pitch_range
 
   attr_reader :polyphony
 
@@ -61,11 +63,11 @@ class Instrument
     @midi_voices.collect { |midi_voice| @polyphony - midi_voice.active_pitches.count { |_| !_[:note_controls].empty? } }.sum
   end
 
-  def note(pitch_note = nil, pitch: nil, voice:, duration:, velocity:, level2: nil, level3: nil, **techniques)
+  def note(pitch_note = nil, pitch: nil, voice:, duration:, bpm:, velocity:, level2: nil, level3: nil, **techniques)
     pitch ||= pitch_note
     techniques = techniques.select { |_, v| v }
 
-    technique, effective_duration, effective_velocity = calculate_technique(pitch, duration, velocity, normalize(techniques))
+    technique, effective_durations, effective_velocity = calculate_technique(pitch, duration, bpm, velocity, normalize(techniques))
 
     @voice_to_midi_voice_map.cleanup
     midi_voice = @voice_to_midi_voice_map[voice]
@@ -99,7 +101,7 @@ class Instrument
                 "#{@name}: "\
                 "voice #{voice} "\
                 "pitch #{pitch} "\
-                "duration #{effective_duration.to_r.inspect} "\
+                "duration #{effective_durations.sum.to_r.inspect} "\
                 "velocity #{effective_velocity.to_f.round(0)} "\
                 "#{techniques.inspect} "\
                 "#{voice_info}")
@@ -114,7 +116,13 @@ class Instrument
         midi_voice.controller[:mod_wheel] = midi_voice.controller[:expression] = 127
       end
 
-      midi_voice.note pitch, duration: effective_duration, velocity: effective_velocity
+      time_to_wait = 0
+      effective_durations.each do |effective_duration|
+        midi_voice.sequencer.wait(time_to_wait) do
+          midi_voice.note pitch, duration: effective_duration, velocity: effective_velocity
+        end
+        time_to_wait += effective_duration
+      end
 
       RenderJSON.instance.render position: midi_voice.sequencer.position.to_f,
                                  instrument: @name,
@@ -123,20 +131,32 @@ class Instrument
                                  pitch: pitch,
                                  articulation: technique.id,
                                  articulation_tags: technique.tags.to_a,
-                                 duration: effective_duration.to_f,
+                                 duration: effective_durations.sum.to_f,
                                  velocity: effective_velocity
     end
   end
 
-  protected def calculate_technique(pitch, duration, velocity, techniques)
+  protected def calculate_technique(pitch, duration, bpm, velocity, techniques)
     @logger.warn { "#{@name}: calculating technique: losing techniques except first one #{techniques}!!!" } if techniques.size > 1
     technique = technique(techniques&.keys&.first)
 
-    effective_duration = @short_duration if technique.tags.include?(:short)
-    effective_duration ||= duration
+    first_duration = @short_duration if technique.tags.include?(:short)
+    first_duration ||= duration
+
+    if @max_duration_in_seconds_per_velocity && first_duration * 4 * (60r / bpm) * velocity > @max_duration_in_seconds_per_velocity
+      base_duration = ((@max_duration_in_seconds_per_velocity / velocity) * (bpm / 60) * (1/4r)).rationalize
+      complete_repeats = (first_duration / base_duration).floor
+
+      effective_duration = [base_duration] * complete_repeats
+      effective_duration += [first_duration - base_duration * complete_repeats]
+    else
+      effective_duration = [first_duration]
+    end
 
     effective_velocity = 64 + velocity / 2 if technique.tags.include?(:short)
     effective_velocity ||= velocity
+
+    info "Calculating breath: original duration #{duration.to_f.round(2)} with breath durations #{effective_duration.collect { |_| _.to_f.round(2) }}" if effective_duration.size > 1
 
     return technique, effective_duration, effective_velocity
   end

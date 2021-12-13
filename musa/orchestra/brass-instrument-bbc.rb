@@ -40,7 +40,8 @@ class BrassInstrument_BBC < Instrument
 
     }.delete_if { |_, v| v.nil? }
 
-    @short_duration = 1r
+    @short_duration = 1/4r
+    @max_duration_in_seconds_per_velocity = 5.0 * 80
 
     super(name, midi_voices: midi_voices, tick_duration: tick_duration, logger: logger)
   end

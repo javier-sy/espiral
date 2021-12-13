@@ -922,7 +922,7 @@ He añadido la renderización de las articulaciones pero hay algún error en el 
 # Lunes, 25 octubre 2021.
 
 Resuelto el problema de selección de la articulación Y ajustando la dinámica de las articulaciones al máximo sale algo bastante interesante.
-([tag v10](https://github.com/javier-sy/2020-10-05-Espiral/tree/v10))
+Versión ([tag v10](https://github.com/javier-sy/2020-10-05-Espiral/tree/v10))
 
 Hay un problema con notas sonando a la vez en algunos instrumentos monofónicos. No sé si vendrá de 
 la cuantización de las curvas o de los instrumentos adimitiendo más notas de las posibles en alguna condición.
@@ -930,7 +930,7 @@ la cuantización de las curvas o de los instrumentos adimitiendo más notas de l
 # Martes, 26 octubre 2021.
 
 Resuelto el problema de instrumentos con más notas que las que permite su polifonía.
-He bajado una 5ª las alturas para que no brille tanto. ([tag v11](https://github.com/javier-sy/2020-10-05-Espiral/tree/v11))
+He bajado una 5ª las alturas para que no brille tanto. Versión ([tag v11](https://github.com/javier-sy/2020-10-05-Espiral/tree/v11))
 
 
 # Lunes, 22 noviembre 2021.
@@ -972,7 +972,7 @@ Ajustar los niveles para asegurar que suenan mínimamente las primeras articulac
 He ajustado los niveles para que las notas cortas y de nivel bajo suenen mínimamente.
 He añadido un log para ver el uso de los instrumentos.
 
-([tag v12](https://github.com/javier-sy/2020-10-05-Espiral/tree/v12))
+Versión ([tag v12](https://github.com/javier-sy/2020-10-05-Espiral/tree/v12))
 
 Sería interesante generar un fichero csv con la información simbólica de lo que suena para analizarlo y comprobar qué ocurre.
 
@@ -983,5 +983,50 @@ He pasado a constantes todas las apariciones de valores fijos.
 
 La idea es hacer fácil la generación de alternativas.
 
-([tag v13](https://github.com/javier-sy/2020-10-05-Espiral/tree/v13))
+Versión ([tag v13](https://github.com/javier-sy/2020-10-05-Espiral/tree/v13))
 
+# Martes, 30 noviembre 2021.
+
+He comenzado a investigar la espacialización 3D con ambisonics y el plugin NX de Waves. 
+Parece que podré hacerlo para auriculares sin problemas a través de MaxMSP. 
+
+# Miércoles, 1 diciembre 2021.
+
+He seguido probando la generación de audio espacializado con ambisonics usando Envelope for Live.
+He añadido una salida en el dispositivo master de Envelope for Live para Waves NX, de modo
+que se pueda escuchar espacializado con tracking de los movimientos de la cabeza.
+
+# Jueves, 2 diciembre 2021.
+
+He tenido que arreglar el dispositivo m4l de control de los micrófonos de la BBC SO Pro porque no 
+controlaba los dispositivos secundarios.
+
+He generado el dispositivo m4l de Envelope Master para NX.
+
+He añadido los dispositivos de control de micrófonos en live.
+
+# Jueves, 9 diciembre 2021.
+
+He modificado los rangos de los instrumentos para que usen sus mejores rangos, no el rango completo.
+Además de facilitar la interpretación y mejorar el sonido hará que se usen más instrumentos.
+
+También he ajustado la duración de las notas cortas entre 1/4 y 1/16 entre todos los instrumentos.
+
+Y he añadido la posibilidad de respirar para las notas largas en los instrumentos que lo requieran.
+Lo he hecho añadiendo una propiedad _max_duration_ aunque si fuera necesario lap podría cambiar
+por "volumen de aire" disponible que se consumiría en función de la duración,
+la intensidad de la nota y un "factor de consumo de aire en función de la intensidad" que dependería
+de cada instrumento.
+
+# Viernes, 10 diciembre 2021.
+
+Tras resolver problemas de falta de memoria 
+(debido a que las librerías en VEP estaban configuradas para aprovechar mucha memoria antes de usar múltiples micrófonos)
+he comprobado que la forma de limitar la duración de las notas para que el intérprete respire no resulta natural.
+Paso al modelo "medio complejo" del consumo de aire según la intensidad.
+
+Lo he implementado pero tiene algún fallo que genera notas ultracortas. A ver mañana.
+
+# Lunes, 13 diciembre 2021.
+
+La fórmula para calcular la respiración en notas largas estaba mal. Corregida.

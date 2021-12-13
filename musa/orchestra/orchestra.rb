@@ -50,8 +50,8 @@ class Orchestra
       min_pitch = instruments.collect(&:pitch_range).collect(&:min).min
       max_pitch = instruments.collect(&:pitch_range).collect(&:max).max
 
-      min_central_pitch = instruments.collect(&:central_pitch_range).collect(&:min).min
-      max_central_pitch = instruments.collect(&:central_pitch_range).collect(&:max).max
+      min_central_pitch = instruments.collect(&:best_pitch_range).collect(&:min).min
+      max_central_pitch = instruments.collect(&:best_pitch_range).collect(&:max).max
 
       min_harmonics_pitch = instruments.collect(&:harmonics_pitch_range).compact.collect(&:min).min
       max_harmonics_pitch = instruments.collect(&:harmonics_pitch_range).compact.collect(&:max).max

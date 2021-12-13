@@ -21,6 +21,8 @@ class TunedPercussion_BBC < Instrument
       [:rolls, [:long, :rolls]] => (1 if all || a),
     }.delete_if { |_, v| v.nil? }
 
+    @short_duration = 1/16r
+
     super(name, midi_voices: midi_voices, tick_duration: tick_duration, logger: logger)
   end
 end

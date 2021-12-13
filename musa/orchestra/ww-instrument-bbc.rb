@@ -40,6 +40,9 @@ class WoodwindInstrument_BBC < Instrument
 
     }.delete_if { |_, v| v.nil? }
 
+    @short_duration = 1/8r
+    @max_duration_in_seconds_per_velocity = 4.0 * 70
+
     super(name, midi_voices: midi_voices, tick_duration: tick_duration, logger: logger)
   end
 end

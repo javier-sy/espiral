@@ -35,7 +35,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
 
       info "Rendering level 2 pitch #{pitch[:pitch]} velocity #{pitch[:velocity]} duration #{pitch[:duration].round(3)}"
 
-      instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }, level2: level2
+      instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }, bpm: @clock.bpm, level2: level2
     end
   end
 
@@ -101,7 +101,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
 
         pitch[technique.id] = true
 
-        instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }, level2: level2, level3: level3
+        instrument.note **pitch.tap { |_| _[:pitch] = put_in_pitch_range(instrument, _[:pitch]) }, bpm: @clock.bpm, level2: level2, level3: level3
       else
         warn "Not found alternative instrument for timbre #{timbre} and pitch #{pitch[:pitch]} in instruments pool #{instruments_pool}"
         @missing_instruments ||= {}

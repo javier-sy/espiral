@@ -23,7 +23,7 @@ class Keyboard < Instrument
     super(name, midi_voices: midi_voices, tick_duration: tick_duration, logger: logger)
   end
 
-  protected def calculate_technique(pitch, duration, velocity, techniques)
+  protected def calculate_technique(pitch, duration, bpm, velocity, techniques)
     staccato = techniques[:staccato]
     standard = techniques[:standard]
     legato = techniques[:legato]
@@ -71,7 +71,7 @@ class Keyboard < Instrument
 
     effective_duration = max_effective_duration if effective_duration > max_effective_duration
 
-    return technique(:standard), effective_duration, effective_velocity
+    return technique(:standard), [effective_duration], effective_velocity
   end
 end
 

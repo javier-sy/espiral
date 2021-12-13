@@ -50,7 +50,7 @@ class InstrumentsPool
     path = search_path_index(start_position, @instruments.size)
 
     found_index = path.find do |i|
-      @instruments[i].free_voices.positive? && @instruments[i].pitch_range.include?(pitch)
+      @instruments[i].free_voices.positive? && @instruments[i].best_pitch_range.include?(pitch)
     end
 
     @instruments[found_index] if found_index
