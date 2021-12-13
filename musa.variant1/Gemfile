@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+
+ruby '2.7.4'
+
+gem 'midi-communications'
+gem 'musa-dsl', '~> 0.26', '>= 0.26.2'
+
+gem 'mittsu'
