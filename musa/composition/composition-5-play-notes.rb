@@ -19,7 +19,8 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
 
       note = { grade: (CENTER_PITCH + values[0]).to_i,
                duration: quantized_duration.min,
-               velocity: (velocity_ratio * 9) - 3.0, # remember it's -5.0 to +4.0 range (being a GDV)
+               velocity: (velocity_ratio * 6 +
+                          ((values[1] - @level2_box.y_min) / @level2_box.y_range) * 3) - 3.0,
                voice: "#{level2}" }.extend(GDV)
 
       pitch = note.to_pdv(@chromatic_scale)
@@ -87,7 +88,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
         techniques_group = instrument.techniques_groups.values[articulation1 * (instrument.techniques_groups.size - 1).round]
         technique = instrument.technique(techniques_group[articulation2 * (techniques_group.size - 1).round])
 
-        info "selecting articulation #{articulation1.round(2)}:#{articulation2.round(2)} for #{instrument.name}: #{technique&.id || 'nil'}", force: true
+        info "selecting articulation #{articulation1.round(2)}:#{articulation2.round(2)} for #{instrument.name}: #{technique&.id || 'nil'}"
 
         if technique.nil?
           technique = instrument.find_techniques(:legato).first

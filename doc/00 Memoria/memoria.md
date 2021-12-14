@@ -1045,3 +1045,11 @@ OJO: Parece que hay repeticiones de notas que no tienen sentido y no se deben a 
 OJO: También hay notas sobrepuestas cuando en teoría sólo tendría que estar habiendo una línea.
 
 ¿Puede estar habiendo un problema con la cuantización?
+
+# Martes, 14 diciembre 2021.
+
+¿Puede estar habiendo un problema con la cuantización? -> NO. El problema es que la dimensión Y 
+no se estaba utilizando en el piano (en el resto de instrumentos se usa para la articulación).
+
+He incluído la dimensión Y como parte de la velocidad (no creo que se note mucho porque el rango de Y puede ser muy grande y el salto entre valores de Y del orden de la unidad).
+
