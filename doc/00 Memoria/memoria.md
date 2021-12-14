@@ -1053,3 +1053,6 @@ no se estaba utilizando en el piano (en el resto de instrumentos se usa para la 
 
 He incluído la dimensión Y como parte de la velocidad (no creo que se note mucho porque el rango de Y puede ser muy grande y el salto entre valores de Y del orden de la unidad).
 
+Tercer cambio de parámetros (en composition-3-spirals.rb): [Variante 3](https://github.com/javier-sy/espiral/tree/master/musa.variant3).
+
+Cuarto cambio de parámetros (en composition-3-spirals.rb): [Variante 4](https://github.com/javier-sy/espiral/tree/master/musa.variant4).
