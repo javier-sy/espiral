@@ -17,7 +17,7 @@ class CompositionWithSpirals < CompositionWithInstrumentation
   LEVEL2_SPIRALS = 13 # fibonacci serie 1 1 2 3 5 8 _13_ 21 34
   LEVEL2_SPIRALS_BEFORE_INFLECTION = 8
 
-  LEVEL2_TURN_RADIUS_DELTA = 7
+  LEVEL2_TURN_RADIUS_DELTA = 7 # podría pasarse a dependiente del nivel 3
 
   LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE =
     FIBO().max_size(LEVEL2_SPIRALS_BEFORE_INFLECTION) +
@@ -28,17 +28,17 @@ class CompositionWithSpirals < CompositionWithInstrumentation
       FIBO().max_size(LEVEL2_SPIRALS - LEVEL2_SPIRALS_BEFORE_INFLECTION))
     .map { |_| _ * 2 }
 
-  LEVEL3_RADIUS_FACTOR = 12
+  LEVEL3_RADIUS_FACTOR = 12 # podría pasarse a dependiente del nivel 3
 
-  LEVEL3_SPIRAL_A_TURNS = 7
-  LEVEL3_SPIRAL_A_LENGTH = 3
+  LEVEL3_SPIRAL_A_TURNS = 7 # podría pasarse a dependiente del nivel 3
+  LEVEL3_SPIRAL_A_LENGTH = 3 # podría pasarse a dependiente del nivel 3
 
-  LEVEL3_SPIRAL_B_TURNS = 1
-  LEVEL3_SPIRAL_B_LENGTH = 2
+  LEVEL3_SPIRAL_B_TURNS = 1 # podría pasarse a dependiente del nivel 3
+  LEVEL3_SPIRAL_B_LENGTH = 2 # podría pasarse a dependiente del nivel 3
 
   LEVEL2_BARS_PER_SPIRAL_SERIE = A(LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE, LEVEL3_BARS_PER_TURN_SERIE).map { |turns, bars| turns * bars }
 
-  LEVEL2_ROTATE_Z_OFFSET =  1.1
+  LEVEL2_ROTATE_Z_OFFSET =  1.1 # podría pasarse a dependiente del nivel 3 ???
 
   LEVEL1_ASKED_TURNS = 21 # fibonacci serie 1 1 2 3 5 8 13 _21_ 34
   LEVEL1_TURNS_BEFORE_INFLECTION = 13
