@@ -1030,7 +1030,7 @@ Lo he implementado pero tiene algún fallo que genera notas ultracortas. A ver m
 # Lunes, 13 diciembre 2021.
 
 La fórmula para calcular la respiración en notas largas estaba mal. Corregida. 
-Versión ([tag v14](https://github.com/javier-sy/2020-10-05-Espiral/tree/v14)).
+Versión ([tag v14](https://github.com/javier-sy/2020-10-05-Espiral/tree/v14)) que corresponde a [Variante 0](https://github.com/javier-sy/espiral/tree/master/musa.variant0). 
 
 El resultado es interesante. El final un poco pobre.
 
@@ -1056,3 +1056,11 @@ He incluído la dimensión Y como parte de la velocidad (no creo que se note muc
 Tercer cambio de parámetros (en composition-3-spirals.rb): [Variante 3](https://github.com/javier-sy/espiral/tree/master/musa.variant3).
 
 Cuarto cambio de parámetros (en composition-3-spirals.rb): [Variante 4](https://github.com/javier-sy/espiral/tree/master/musa.variant4).
+
+Sería interesante hacer análisis estadístico de las obras (incluyendo registro de notas perdidas).
+
+Y sería interesante explorar una pieza que algunos de los macroparámetros cambien durante la pieza (en cada espiral de nivel 3, p.ej.)
+
+# Miércoles, 15 diciembre 2021.
+
+Generando [Variante 5](https://github.com/javier-sy/espiral/tree/master/musa.variant5).

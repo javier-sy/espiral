@@ -68,7 +68,7 @@ class CompositionWithNotesPlaying < CompositionWithSpiralsRunner
       timbre = ((@level2_x[i]) - @level2_box.x_min) / @level2_box.x_range
 
       # articulation1 = ((@level2_y[i]) - @level2_box.y_min) / @level2_box.y_range
-      articulation1 = ((level2 % LEVEL3_ARTICULATION_GROUP_ROTATION_SIZE) / LEVEL3_ARTICULATION_GROUP_ROTATION_SIZE)
+      articulation1 = ((level2 % LEVEL3_ARTICULATION_GROUP_ROTATION_SIZE.to_f) / LEVEL3_ARTICULATION_GROUP_ROTATION_SIZE.to_f)
 
       instruments_pool = @instruments_pools[@level1_magnitude_ratio * @instruments_pools.size]
       instrument = instruments_pool.find_free_with(timbre: timbre, pitch: pitch[:pitch])
