@@ -1071,4 +1071,6 @@ He añadido que algunos de los parámetros que eran fijos sean dependientes de l
 
 He regenerado la versión _v14_, que era _variant0_, como [Variante 6](https://github.com/javier-sy/espiral/tree/master/musa.variant6). Suena diferente y tiene una duración diferente... ¿Qué ha cambiado?
 
-SEGUIR CON: COMPROBAR QUÉ HA PASADO PARA QUE ESTA VERSION SEA DIFERENTE DE V14
+El problema era que la variant0 no estaba bien copiada. Copié otra variante incorrectamente!!! La he restaurado.
+
+SEGUIR CON: COMPROBAR QUE LA NUEVA variante 6 es como la v14, y luego aplicar la v7
