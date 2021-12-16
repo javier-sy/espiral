@@ -1064,3 +1064,11 @@ Y sería interesante explorar una pieza que algunos de los macroparámetros camb
 # Miércoles, 15 diciembre 2021.
 
 Generando [Variante 5](https://github.com/javier-sy/espiral/tree/master/musa.variant5).
+
+# Jueves, 16 diciembre 2021.
+
+He añadido que algunos de los parámetros que eran fijos sean dependientes de la espiral de nivel 3 en que se encuentran.
+
+He regenerado la versión _v14_, que era _variant0_, como [Variante 6](https://github.com/javier-sy/espiral/tree/master/musa.variant6). Suena diferente y tiene una duración diferente... ¿Qué ha cambiado?
+
+SEGUIR CON: COMPROBAR QUÉ HA PASADO PARA QUE ESTA VERSION SEA DIFERENTE DE V14

@@ -17,7 +17,7 @@ class CompositionWithSpirals < CompositionWithInstrumentation
   LEVEL2_SPIRALS = 13 # fibonacci serie 1 1 2 3 5 8 _13_ 21 34
   LEVEL2_SPIRALS_BEFORE_INFLECTION = 8
 
-  LEVEL2_TURN_RADIUS_DELTA =
+  LEVEL2_TURN_RADIUS_DELTA = 4
 
   LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE =
     FIBO().max_size(LEVEL2_SPIRALS_BEFORE_INFLECTION) +

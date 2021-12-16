@@ -17,7 +17,7 @@ class CompositionWithSpirals < CompositionWithInstrumentation
   LEVEL2_SPIRALS = 13 # fibonacci serie 1 1 2 3 5 8 _13_ 21 34
   LEVEL2_SPIRALS_BEFORE_INFLECTION = 8
 
-  LEVEL2_TURN_RADIUS_DELTA = 7 # podría pasarse a dependiente del nivel 3
+  LEVEL2_TURN_RADIUS_DELTA_SERIE = S(4).repeat
 
   LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE =
     FIBO().max_size(LEVEL2_SPIRALS_BEFORE_INFLECTION) +
@@ -28,25 +28,25 @@ class CompositionWithSpirals < CompositionWithInstrumentation
       FIBO().max_size(LEVEL2_SPIRALS - LEVEL2_SPIRALS_BEFORE_INFLECTION))
     .map { |_| _ * 2 }
 
-  LEVEL3_RADIUS_FACTOR = 12 # podría pasarse a dependiente del nivel 3
+  LEVEL3_RADIUS_FACTOR_SERIE_I = S(4).repeat.i
 
-  LEVEL3_SPIRAL_A_TURNS = 7 # podría pasarse a dependiente del nivel 3
-  LEVEL3_SPIRAL_A_LENGTH = 3 # podría pasarse a dependiente del nivel 3
+  LEVEL3_SPIRAL_A_TURNS_SERIE_I = S(8).repeat.i
+  LEVEL3_SPIRAL_A_LENGTH_SERIE_I = S(3).repeat.i
 
-  LEVEL3_SPIRAL_B_TURNS = 1 # podría pasarse a dependiente del nivel 3
-  LEVEL3_SPIRAL_B_LENGTH = 2 # podría pasarse a dependiente del nivel 3
+  LEVEL3_SPIRAL_B_TURNS_SERIE_I = S(2).repeat.i
+  LEVEL3_SPIRAL_B_LENGTH_SERIE = S(3).repeat.i
 
   LEVEL2_BARS_PER_SPIRAL_SERIE = A(LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE, LEVEL3_BARS_PER_TURN_SERIE).map { |turns, bars| turns * bars }
 
-  LEVEL2_ROTATE_Z_OFFSET =  1.1 # podría pasarse a dependiente del nivel 3 ???
+  LEVEL2_ROTATE_Z_OFFSET_SERIE_I = S(1.15).repeat.i
 
   LEVEL1_ASKED_TURNS = 21 # fibonacci serie 1 1 2 3 5 8 13 _21_ 34
   LEVEL1_TURNS_BEFORE_INFLECTION = 13
   LEVEL1_BARS_PER_TURN = LEVEL2_BARS_PER_SPIRAL_SERIE.to_a.sum / LEVEL1_ASKED_TURNS
   LEVEL1_TURNS = LEVEL2_BARS_PER_SPIRAL_SERIE.to_a.sum / LEVEL1_BARS_PER_TURN.to_f
-  LEVEL1_MAX_RADIUS = 12
+  LEVEL1_MAX_RADIUS = 15
 
-  LEVEL3_ARTICULATION_GROUP_ROTATION_SIZE = 5
+  LEVEL3_ARTICULATION_GROUP_ROTATION_SIZE = 5.0
 
   def initialize(realtime: false, render3d: nil, do_voices_log: true, draw_level1: true, draw_level2: true, draw_level3: true)
     super(realtime: realtime, render3d: render3d, do_voices_log: do_voices_log)
@@ -65,17 +65,17 @@ class CompositionWithSpirals < CompositionWithInstrumentation
     info ''
     info "LEVEL2_SPIRALS                   = #{LEVEL2_SPIRALS}"
     info "LEVEL2_SPIRALS_BEFORE_INFLECTION = #{LEVEL2_SPIRALS_BEFORE_INFLECTION}"
-    info "LEVEL2_TURN_RADIUS_DELTA         = #{LEVEL2_TURN_RADIUS_DELTA}"
+    # info "LEVEL2_TURN_RADIUS_DELTA         = #{LEVEL2_TURN_RADIUS_DELTA}"
     info "LEVEL2_BARS_PER_SPIRAL_SERIE     = #{LEVEL2_BARS_PER_SPIRAL_SERIE.to_a}"
-    info "LEVEL2_ROTATE_Z_OFFSET           = #{LEVEL2_ROTATE_Z_OFFSET}"
+    # info "LEVEL2_ROTATE_Z_OFFSET           = #{LEVEL2_ROTATE_Z_OFFSET}"
     info ''
     info "LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE= #{LEVEL3_TURNS_BY_LEVEL2_TURN_SERIE.to_a}"
     info "LEVEL3_BARS_PER_TURN_SERIE       = #{LEVEL3_BARS_PER_TURN_SERIE.to_a}"
-    info "LEVEL3_RADIUS_FACTOR             = #{LEVEL3_RADIUS_FACTOR}"
-    info "LEVEL3_SPIRAL_TURNS_A            = #{LEVEL3_SPIRAL_A_TURNS}"
-    info "LEVEL3_SPIRAL_LENGTH_A           = #{LEVEL3_SPIRAL_A_LENGTH}"
-    info "LEVEL3_SPIRAL_TURNS_B            = #{LEVEL3_SPIRAL_B_TURNS}"
-    info "LEVEL3_SPIRAL_LENGTH_B           = #{LEVEL3_SPIRAL_B_LENGTH}"
+    # info "LEVEL3_RADIUS_FACTOR             = #{LEVEL3_RADIUS_FACTOR}"
+    # info "LEVEL3_SPIRAL_TURNS_A            = #{LEVEL3_SPIRAL_A_TURNS}"
+    # info "LEVEL3_SPIRAL_LENGTH_A           = #{LEVEL3_SPIRAL_A_LENGTH}"
+    # info "LEVEL3_SPIRAL_TURNS_B            = #{LEVEL3_SPIRAL_B_TURNS}"
+    # info "LEVEL3_SPIRAL_LENGTH_B           = #{LEVEL3_SPIRAL_B_LENGTH}"
     info "LEVEL3_ARTICULATION_GROUP_ROTATION_SIZE = #{LEVEL3_ARTICULATION_GROUP_ROTATION_SIZE}"
 
     # Compute level 1 spiral
@@ -151,6 +151,7 @@ class CompositionWithSpirals < CompositionWithInstrumentation
 
   private def calculate_level2_matrix
     spiral_lengths_serie = LEVEL2_BARS_PER_SPIRAL_SERIE.i
+    delta_radius_serie = LEVEL2_TURN_RADIUS_DELTA_SERIE.i
 
     last_radius = 0
     last_point = Vector[0.0, 0.0, 0.0]
@@ -181,7 +182,7 @@ class CompositionWithSpirals < CompositionWithInstrumentation
 
     while spiral_length = spiral_lengths_serie.next_value
 
-      delta_radius = round < LEVEL2_SPIRALS_BEFORE_INFLECTION ? LEVEL2_TURN_RADIUS_DELTA : -LEVEL2_TURN_RADIUS_DELTA
+      delta_radius = round < LEVEL2_SPIRALS_BEFORE_INFLECTION ? delta_radius_serie.next_value : -delta_radius_serie.next_value
 
       info "level 2 processing spiral #{round} of length #{spiral_length} with radius_start #{last_radius} radius_end #{last_radius + delta_radius}"
 
@@ -203,9 +204,9 @@ class CompositionWithSpirals < CompositionWithInstrumentation
 
       rotate_x ||= 0.0
       rotate_y ||= 0.0
-      rotate_z = LEVEL2_ROTATE_Z_OFFSET - (rotate_x**2 + rotate_y**2)**(1/2r)
+      rotate_z = LEVEL2_ROTATE_Z_OFFSET_SERIE_I.next_value - (rotate_x**2 + rotate_y**2)**(1/2r)
 
-      info "level 2 spiral #{round} rotating to: x = #{rotate_x} y = #{rotate_y} z = #{rotate_z}"
+      info "level 2 spiral #{round} rotating to: x = #{rotate_x} y = #{rotate_y} z = #{rotate_z} (z offset #{LEVEL2_ROTATE_Z_OFFSET_SERIE_I.current_value})"
 
       rotated_spiral =
         (spiral.unit_boxed *
@@ -251,20 +252,22 @@ class CompositionWithSpirals < CompositionWithInstrumentation
 
       duration = curve_timed_serie_a.last[:time] - curve_timed_serie_a.first[:time]
 
-      radius = (1 + LEVEL3_RADIUS_FACTOR * (start[1] - @level2_box.y_min) / @level2_box.y_range).round.to_i
+      radius = (1 + LEVEL3_RADIUS_FACTOR_SERIE_I.next_value * (start[1] - @level2_box.y_min) / @level2_box.y_range).round.to_i
 
       info "calculating level 3 matrix #{i}: radius #{radius} duration #{duration}"
 
-      spiral = MatrixOperations.spiral(LEVEL3_SPIRAL_A_TURNS,
+      part_a_length = LEVEL3_SPIRAL_A_LENGTH_SERIE_I.next_value
+
+      spiral = MatrixOperations.spiral(LEVEL3_SPIRAL_A_TURNS_SERIE_I.next_value,
                                        radius_start: 0,
                                        radius_end: radius,
-                                       length: LEVEL3_SPIRAL_A_LENGTH,
+                                       length: part_a_length,
                                        resolution: 360).vstack(
-                                         MatrixOperations.spiral(LEVEL3_SPIRAL_B_TURNS,
+                                         MatrixOperations.spiral(LEVEL3_SPIRAL_B_TURNS_SERIE_I.next_value,
                                                                  radius_start: radius,
                                                                  radius_end: 0,
-                                                                 length: LEVEL3_SPIRAL_B_LENGTH,
-                                                                 z_start: LEVEL3_SPIRAL_A_LENGTH,
+                                                                 length: LEVEL3_SPIRAL_B_LENGTH_SERIE.next_value,
+                                                                 z_start: LEVEL3_SPIRAL_A_LENGTH_SERIE_I.next_value,
                                                                  resolution: 360,
                                                                  last: true))
 
