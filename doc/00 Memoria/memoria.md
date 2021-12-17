@@ -1073,4 +1073,6 @@ He regenerado la versión _v14_, que era _variant0_, como [Variante 6](https://g
 
 El problema era que la variant0 no estaba bien copiada. Copié otra variante incorrectamente!!! La he restaurado.
 
-SEGUIR CON: COMPROBAR QUE LA NUEVA variante 6 es como la v14, y luego aplicar la v7
+# Viernes, 17 diciembre 2021.
+
+La _Variante 6_ es muy interesante. Creo que tiene algunas pequeñas diferencias con la _v14_ supongo que por los cambios en el modelo de asignación de instrumentos.
