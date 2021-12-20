@@ -1078,3 +1078,7 @@ El problema era que la variant0 no estaba bien copiada. Copié otra variante inc
 La [Variante 6](https://github.com/javier-sy/espiral/tree/master/musa.variant6) es muy interesante. Creo que tiene algunas pequeñas diferencias con la _v14_ supongo que por los cambios en el modelo de asignación de instrumentos.
 
 wwNueva [Variante 7](https://github.com/javier-sy/espiral/tree/master/musa.variant7) con parámetros con pequeñas variaciones a través de series.
+
+# Lunes, 20 diciembre 2021.
+
+Hoy he enviado a Mikel, Josep Cerdà y a Berenguer las variantes 6 y 7. Creo que lo doy por cerrado por ahora.
