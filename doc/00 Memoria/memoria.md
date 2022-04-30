@@ -1082,3 +1082,17 @@ wwNueva [Variante 7](https://github.com/javier-sy/espiral/tree/master/musa.varia
 # Lunes, 20 diciembre 2021.
 
 Hoy he enviado a Mikel, Josep Cerdà y a Berenguer las variantes 6 y 7. Creo que lo doy por cerrado por ahora.
+
+# Febrero 2022.
+
+Durante este mes, de manera informal y tras la reunión con Mikel, he estado pensando en el espacio.
+Algo que está de fondo en la construcción de obra: cómo el sonido informa del espacio y cómo hacer un sonido creativo de ello.
+El sonido habla del espado a través de la reverberación (además de a través de la posición de la fuente del sonido, que en realidad habla más del espacio "emulado").
+
+Me planteo, hablado con Mikel y Josep, usar el sonido del espacio en sí (a través de reverbs de convolución con IR adhoc realizadas con "petardos").
+
+# Jueves, 24 febrero 2022.
+
+Llevo estos dos meses entre pausa para refrescar ideas e implementando MusaDSL for Live/Bitwig.
+En concreto estos últimos días estoy con el problema de que MusaLCE no hace bien los "imports" de los paquetes de Musa
+y no deja utilizar las clases directamente, obliga a ponerles el namespace completo.
