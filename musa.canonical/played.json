@@ -3825,3 +3825,4 @@
 {"position":521.6770833333334,"instrument":"CorAnglais","level2":20,"level3":1,"pitch":64,"articulation":"tenuto","articulation_tags":["tenuto","t","short"],"duration":0.125,"velocity":72.8083140878519},
 {"position":522.1875,"instrument":"TheGrandeurPiano","level2":20,"level3":null,"pitch":72,"articulation":"standard","articulation_tags":["standard","long"],"duration":0.3055555555555556,"velocity":55.791813079998605},
 {"position":522.5,"instrument":"CorAnglais","level2":20,"level3":2,"pitch":64,"articulation":"tenuto","articulation_tags":["tenuto","t","short"],"duration":0.125,"velocity":72.0},
+]

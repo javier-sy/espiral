@@ -73,10 +73,10 @@ class Orchestra
 
     # Strings definition
     #
-    violin_midi_voices = MIDIVoices.new(sequencer: sequencer, output: violins_midi_output, channels: 1..8, do_log: do_voices_log)
-    viola_midi_voices = MIDIVoices.new(sequencer: sequencer, output: strings_midi_output, channels: 1..4, do_log: do_voices_log)
-    cello_midi_voices = MIDIVoices.new(sequencer: sequencer, output: strings_midi_output, channels: 5..8, do_log: do_voices_log)
-    contrabass_midi_voices = MIDIVoices.new(sequencer: sequencer, output: strings_midi_output, channels: 9..12, do_log: do_voices_log)
+    violin_midi_voices = MIDIVoices.new(sequencer: sequencer, output: violins_midi_output, channels: 0..7, do_log: do_voices_log)
+    viola_midi_voices = MIDIVoices.new(sequencer: sequencer, output: strings_midi_output, channels: 0..3, do_log: do_voices_log)
+    cello_midi_voices = MIDIVoices.new(sequencer: sequencer, output: strings_midi_output, channels: 4..7, do_log: do_voices_log)
+    contrabass_midi_voices = MIDIVoices.new(sequencer: sequencer, output: strings_midi_output, channels: 8..11, do_log: do_voices_log)
 
     @violin = Violin.new(midi_voices: violin_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
     @viola = Viola.new(midi_voices: viola_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
@@ -85,13 +85,13 @@ class Orchestra
 
     # Woodwinds definition
     #
-    piccolo_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 1, do_log: do_voices_log)
-    flute_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 2, do_log: do_voices_log)
-    clarinet_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 3..4, do_log: do_voices_log)
-    bass_clarinet_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 5, do_log: do_voices_log)
-    oboe_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 6..7, do_log: do_voices_log)
-    bassoon_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 8, do_log: do_voices_log)
-    cor_anglais_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 9, do_log: do_voices_log)
+    piccolo_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 0, do_log: do_voices_log)
+    flute_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 1, do_log: do_voices_log)
+    clarinet_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 2..3, do_log: do_voices_log)
+    bass_clarinet_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 4, do_log: do_voices_log)
+    oboe_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 5..6, do_log: do_voices_log)
+    bassoon_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 7, do_log: do_voices_log)
+    cor_anglais_midi_voices = MIDIVoices.new(sequencer: sequencer, output: ww_midi_output, channels: 8, do_log: do_voices_log)
 
     @piccolo = Piccolo.new(midi_voices: piccolo_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
     @flute = Flute.new(midi_voices: flute_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
@@ -103,11 +103,11 @@ class Orchestra
 
     # Brass definition
     #
-    french_horn_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 1..4, do_log: do_voices_log)
-    trombone_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 5..6, do_log: do_voices_log)
-    contrabass_trombone_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 7, do_log: do_voices_log)
-    tuba_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 8, do_log: do_voices_log)
-    trumpet_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 9, do_log: do_voices_log)
+    french_horn_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 0..3, do_log: do_voices_log)
+    trombone_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 4..5, do_log: do_voices_log)
+    contrabass_trombone_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 6, do_log: do_voices_log)
+    tuba_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 7, do_log: do_voices_log)
+    trumpet_midi_voices = MIDIVoices.new(sequencer: sequencer, output: brass_midi_output, channels: 8, do_log: do_voices_log)
 
     @french_horn = FrenchHorn.new(midi_voices: french_horn_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
     @trombone = TenorTrombone.new(midi_voices: trombone_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
@@ -117,10 +117,10 @@ class Orchestra
 
     # Tuned percussion
     #
-    tubular_bells_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 1, do_log: do_voices_log)
-    marimba_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 2, do_log: do_voices_log)
-    glockenspiel_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 3, do_log: do_voices_log)
-    vibraphone_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 4, do_log: do_voices_log)
+    tubular_bells_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 0, do_log: do_voices_log)
+    marimba_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 1, do_log: do_voices_log)
+    glockenspiel_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 2, do_log: do_voices_log)
+    vibraphone_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 3, do_log: do_voices_log)
 
     @tubular_bells = TubularBells.new(midi_voices: tubular_bells_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
     @marimba = Marimba.new(midi_voices: marimba_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
@@ -129,13 +129,13 @@ class Orchestra
 
     # Blanchet Harpsichord
     #
-    harpshichord_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 5, do_log: do_voices_log)
+    harpshichord_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 4, do_log: do_voices_log)
 
     @harpsichord = FEBlanchetHarpsichord.new(midi_voices: harpshichord_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
 
     # The Grandeur Piano
     #
-    piano_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 6, do_log: do_voices_log)
+    piano_midi_voices = MIDIVoices.new(sequencer: sequencer, output: tuned_perc_midi_output, channels: 5, do_log: do_voices_log)
 
     @piano = TheGrandeurPiano.new(midi_voices: piano_midi_voices.voices, tick_duration: sequencer.tick_duration, logger: logger)
   end

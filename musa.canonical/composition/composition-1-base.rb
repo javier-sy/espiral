@@ -2,7 +2,7 @@ require 'musa-dsl'
 require 'midi-communications'
 require 'forwardable'
 
-require_relative '../lib/probe-3d'
+# require_relative '../lib/probe-3d'
 require_relative '../lib/render-json'
 
 using Musa::Extension::InspectNice
@@ -30,7 +30,7 @@ class CompositionBase
   end
 
   private def create_sequencer(real_clock)
-    sequencer = Sequencer.new 4, 24, keep_proc_context: true, do_error_log: true
+    sequencer = Sequencer.new 4, 24, keep_block_context: true, do_error_log: true
 
     clock = ClockProxy.new(if real_clock
                              TimerClock.new ticks_per_beat: 24, bpm: 90, delayed_ticks_error: 1, logger: sequencer.logger, do_log: true
