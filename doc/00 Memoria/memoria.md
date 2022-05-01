@@ -849,7 +849,8 @@ He multiplicado la dimensión x-y del level 2 por 4. Es espectacular.
 Sobre todo cuando entra el contrabass grave. ([tag v6](https://github.com/javier-sy/2020-10-05-Espiral/tree/v6))
 
 "El sueño de la razón produce monstruos" (aguafuerte de Goya).
-Como subtítulo de Espiral: "El despertar de la razón produce monstruos".
+Como subtítulo de Espiral: "El despertar de la razón produce monstruos". Alusión a la capacidad autogenerativa de Espiral,
+cambiando los macroparámetros.
 
 # Viernes, 1 octubre 2021.
 
@@ -1096,6 +1097,9 @@ Me planteo, hablado con Mikel y Josep, usar el sonido del espacio en sí (a trav
 Llevo estos dos meses entre pausa para refrescar ideas e implementando MusaDSL for Live/Bitwig.
 En concreto estos últimos días estoy con el problema de que MusaLCE no hace bien los "imports" de los paquetes de Musa
 y no deja utilizar las clases directamente, obliga a ponerles el namespace completo.
+
+(Finalmente el problema de los imports lo resolví y dejé una versión de MusaLCEforBitwig bastante aceptable, aunque 
+le falta persistir bien la asignación de pistas dentro de bitwig)
 
 # Domingo, 1 de mayo 2022.
 
