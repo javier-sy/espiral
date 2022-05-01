@@ -1096,3 +1096,20 @@ Me planteo, hablado con Mikel y Josep, usar el sonido del espacio en sí (a trav
 Llevo estos dos meses entre pausa para refrescar ideas e implementando MusaDSL for Live/Bitwig.
 En concreto estos últimos días estoy con el problema de que MusaLCE no hace bien los "imports" de los paquetes de Musa
 y no deja utilizar las clases directamente, obliga a ponerles el namespace completo.
+
+# Domingo, 1 de mayo 2022.
+
+Tras el accidente he estado estos últimos días migrando la renderización de la orquesta de Ableton Live 11 + VEP7 en local a
+Bitwig Studio 4.2 + VEP7 en servidor + procesamiento de audio en local. Entre otras cosas he podido mejorar la asignación de
+canales midi para comenzar por el 1 (en lugar de por el 2) y de los canales de audio (comenzar por par 1/2 en lugar de 3/4). Por
+otro lado me he visto obligado a duplicar las pistas en bitwig: para cada instrumento, una de midi y otra de audio, cosa que 
+en Live se podía hacer en una única pista por instrumento. Nada grave de todos modos.
+
+Por otro lado, la renderización de OpenGL de las espirales ha dejado de funcionar con el nuevo Macbook Pro M1. No sé si es 
+consecuencia del cambio de CPU o si hice algún cambio en la librería mittsu para hacer que funcionase (veo que tengo una versión
+local del repo de mittsu). Aún no lo he comprobado. No es prioritario de momento.
+
+Los siguientes pasos son: implementar la gestión de micrófonos de la orquesta y comenzar a trabajar las reverbs expresivas. Quizás
+también cree un sistema para añadir expresividad según el instrumento en notas largas.
+
+
