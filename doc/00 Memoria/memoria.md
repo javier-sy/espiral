@@ -1103,7 +1103,7 @@ le falta persistir bien la asignación de pistas dentro de bitwig)
 
 # Domingo, 1 de mayo 2022.
 
-Tras el accidente he estado estos últimos días migrando la renderización de la orquesta de Ableton Live 11 + VEP7 en local a
+Tras el accidente estos últimos días he estado migrando la renderización de la orquesta de Ableton Live 11 + VEP7 en local a
 Bitwig Studio 4.2 + VEP7 en servidor + procesamiento de audio en local. Entre otras cosas he podido mejorar la asignación de
 canales midi para comenzar por el 1 (en lugar de por el 2) y de los canales de audio (comenzar por par 1/2 en lugar de 3/4). Por
 otro lado me he visto obligado a duplicar las pistas en bitwig: para cada instrumento, una de midi y otra de audio, cosa que 
@@ -1117,3 +1117,7 @@ Los siguientes pasos son: implementar la gestión de micrófonos de la orquesta 
 también cree un sistema para añadir expresividad según el instrumento en notas largas.
 
 
+# Lunes, 24 octubre 2022.
+
+He retomando Espiral, para prepararla para el concierto de noviembre en Barcelona. Ajustando micrófonos e implementando juegos con 
+la reverb.

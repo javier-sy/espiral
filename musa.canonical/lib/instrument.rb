@@ -45,7 +45,7 @@ class Instrument
 
   attr_reader :played_notes_count
 
-  def techniques # returns canonic symbol id
+  def techniques # returns canonical symbol id
     @technique_ids
   end
 
