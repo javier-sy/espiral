@@ -1,4 +1,4 @@
-# composition-espiral
+# espiral
 Composition for "Espiral" multispeaker musical work (started on 2020-10-05)
 
 # Copyright
