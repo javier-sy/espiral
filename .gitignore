@@ -13,3 +13,4 @@ Samples
 *.wav
 Cache.cfg
 **/auto-backups/
+**/.counts/
