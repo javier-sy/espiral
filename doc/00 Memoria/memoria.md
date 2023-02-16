@@ -1088,7 +1088,7 @@ Hoy he enviado a Mikel, Josep Cerdà y a Berenguer las variantes 6 y 7. Creo que
 
 Durante este mes, de manera informal y tras la reunión con Mikel, he estado pensando en el espacio.
 Algo que está de fondo en la construcción de obra: cómo el sonido informa del espacio y cómo hacer un sonido creativo de ello.
-El sonido habla del espado a través de la reverberación (además de a través de la posición de la fuente del sonido, que en realidad habla más del espacio "emulado").
+El sonido habla del espacio a través de la reverberación (además de a través de la posición de la fuente del sonido, que en realidad habla más del espacio "emulado").
 
 Me planteo, hablado con Mikel y Josep, usar el sonido del espacio en sí (a través de reverbs de convolución con IR adhoc realizadas con "petardos").
 
@@ -1119,5 +1119,73 @@ también cree un sistema para añadir expresividad según el instrumento en nota
 
 # Lunes, 24 octubre 2022.
 
-He retomando Espiral, para prepararla para el concierto de noviembre en Barcelona. Ajustando micrófonos e implementando juegos con 
+He retomando Espiral, para prepararla para el concierto de noviembre en Barcelona. Ajustando micrófonos y pensando cómo hacer la modulación de 
 la reverb.
+
+# Martes, 25 octubre 2022.
+
+He estado pensando cómo realizar la reverb. Cada instrumento va a un canal y por cada tipo se distribuyen ocupando los altavoces disponibles.
+Con sends modulados desde el código se envía la señal a canales de retorno con las reverbs que, a su vez, están vinculadas a pares de altavoces.
+
+# Miércoles, 26 octubre 2022.
+
+Creando la matriz de redirección de envíos en BW para la versión de 8 altavoces: nivel 1 (entrada), sends/returns de reverbs, nivel 2 (), nivel físico.
+Probando con el midifighter y el nakedcontrols mc8 el tipo de reverb y el nivel de send respectivamente.
+
+Faltan parámetros. Falta que tenga sentido el uso de los parámetros. Falta automatizarlo desde musadsl.
+
+# Lunes, 31 octubre 2022.
+
+He montado en BW un dispositivo que mezcla la señal de 2 reverbs y he decidido para cada una de ellas los parámetros básicos.
+Las he integrado en los sends/returns.
+Tengo que controlarlas desde musa a través de unos CC.
+
+Cada sección de la pieza debería tener unos parámetros de reverb sustancialmente diferentes, contrastantes. Con variaciones dentro
+de las secciones.
+
+# Miércoles, 2 novimebre 2022.
+
+Me he planteado que la modulación de la reverb sea manual en lugar de automática. La intervención humana directa con una 
+interpretación del concepto de espiral como un sistema más que procesa el "input" conceptual sección a sección. Donde las 
+secciones son las percibidas subjetivamente.
+
+# Jueves, 3 noviembre 2022.
+
+He estado mezclando la pieza para la versión de 8 altavoces. Añadiendo EQ, TEOTE, saturación, etc.
+
+# Sábado, 5 noviembre 2022.
+
+He generado una versión con las reverbs moduladas a mano. Parece que queda bien. Falta renderizar por separado reverbs y audios
+para generar el player para el concierto.
+
+# Lunes, 7 noviembre 2022.
+
+Preparando la renderización para 8 altavoces con Max/MSP.
+
+# Lunes, 13 noviembre 2022.
+
+Preparando la renderización para 16 altavoces con Max/MSP (pero haciendo la reverb en Max, no en BW).
+
+# Martes, 14 noviembre 2022.
+
+Idem.
+
+# Miércoles, 15 noviembre 2022.
+
+Idem.
+
+# Jueves, 16 noviembre 2022.
+
+Idem.
+
+Poniendo plugins mínimos de mezcla y mastering (teote + hg-2) ya ocupa el >80% de CPU a 44.1 khz. Podría dar
+problemas en el contexto final. Veremos.
+
+El problema que hay ahora es cómo controlar la reverb de cada canal. Al final hay un montón de reverbs que tienen, cada una,
+2 parámetros y que deben mantener una cierta coherencia.
+
+Haciéndolo manual no sé si se puede hacer bien. ¿Simplificar para controlar desde unos pocos parámetros vinculados a las 
+zonas (delante, detrás, izda, derecha, arriba, abajo, etc.)?
+
+¿Permitir discrepancias extremas dentro de esa lógica más o menos uniformizadora (tipo: un instrumento se salta la homogeneidad de su zona?
+

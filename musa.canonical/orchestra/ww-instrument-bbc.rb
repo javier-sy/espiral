@@ -1,10 +1,10 @@
 require 'musa-dsl'
 
-require_relative '../lib/instrument'
+require_relative '../lib/instrument-bbc'
 
 using Musa::Extension::InspectNice
 
-class WoodwindInstrument_BBC < Instrument
+class WoodwindInstrument_BBC < Instrument_BBC
   def initialize(techniques_set, name, midi_voices:, tick_duration:, logger:)
     all = (techniques_set == :all) # piccolo
     a = (techniques_set == :a) # flutes and clarinets

@@ -1,10 +1,10 @@
 require 'musa-dsl'
 
-require_relative '../lib/instrument'
+require_relative '../lib/instrument-bbc'
 
 using Musa::Extension::InspectNice
 
-class BrassInstrument_BBC < Instrument
+class BrassInstrument_BBC < Instrument_BBC
   def initialize(techniques_set, name, midi_voices:, tick_duration:, logger:)
     all = (techniques_set == :all)  # horns and trumpets
     a = (techniques_set == :a) # trombones

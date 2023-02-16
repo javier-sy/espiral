@@ -5,4 +5,4 @@ ruby '2.7.6'
 gem 'midi-communications'
 gem 'musa-dsl', '~> 0.26', '>= 0.26.6'
 
-gem 'mittsu'
+gem 'mittsu', '~> 0.4', '>= 0.4.0'

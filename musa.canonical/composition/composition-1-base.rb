@@ -2,7 +2,7 @@ require 'musa-dsl'
 require 'midi-communications'
 require 'forwardable'
 
-# require_relative '../lib/probe-3d'
+require_relative '../lib/probe-3d'
 require_relative '../lib/render-json'
 
 using Musa::Extension::InspectNice

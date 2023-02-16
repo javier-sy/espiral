@@ -1,10 +1,10 @@
 require 'musa-dsl'
 
-require_relative '../lib/instrument'
+require_relative '../lib/instrument-bbc'
 
 using Musa::Extension::InspectNice
 
-class StringInstrument_BBC < Instrument
+class StringInstrument_BBC < Instrument_BBC
   def initialize(techniques_set, name, midi_voices:, tick_duration:, logger:)
     leader = (techniques_set == :leader)
     section = (techniques_set == :section)
